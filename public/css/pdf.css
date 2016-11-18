@@ -1,0 +1,7 @@
+.donut-holder, table tr{
+    page-break-inside: avoid;
+}
+
+.data-chart {
+    page-break-inside: avoid;
+}
