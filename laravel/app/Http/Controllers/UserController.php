@@ -50,6 +50,7 @@ class UserController extends Controller
             'email' => $request->email,
             'password' => bcrypt($request->password),
             'role_id' => $request->user_role,
+            'verified' => true,
         ]);
 
         return redirect('admin/users')

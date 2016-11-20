@@ -21,6 +21,14 @@ Route::get('/', 'HomeController@show');
 
 Route::auth();
 
+Route::get('verify', 'ProfileController@verify');
+
+Route::get('resend', 'ProfileController@resendConfirmation');
+
+Route::get('verify/change', 'ProfileController@changeEmail');
+
+Route::get('/v/{id}/{code}', 'PublicController@activateUser');
+
 Route::get('/home/', 'HomeController@show');
 
 /*************************************************************************************************************
@@ -34,8 +42,6 @@ Route::post('profile', 'ProfileController@update');
 Route::put('profile', 'ProfileController@changePicture');
 
 Route::get('mysurveys', 'HomeController@mySurveys');
-
-Route::get('/v/{id}/{code}', 'PublicController@activateUser');
 
 /*************************************************************************************************************
  *                                      Survey MANIPULATION                                                  *

@@ -22,6 +22,6 @@ class PublicController extends Controller
             $message = "Your Account is already Activated";
         }
 
-        return view('misc.random-message', ['message' => $message]);
+        return view('misc.activation-success', ['message' => $message]);
     }
 }

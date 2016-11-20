@@ -2,6 +2,9 @@ $(function () {
     // console.log(minDate);
     // console.log('earl is real');
     filterDate();
+    $('.datatable').dataTable({
+        order: []
+    });
 });
 
 function filterDate(){

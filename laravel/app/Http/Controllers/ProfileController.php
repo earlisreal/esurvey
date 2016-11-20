@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Input;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Log;
 use Auth;
@@ -45,14 +46,14 @@ class ProfileController extends Controller
 //            'password' => 'required|min:6|confirmed',
 //        ]);
 
-        if($request->email != $user->email){
+        if ($request->email != $user->email) {
             $check['email'] = 'required|email|max:255|unique:users';
         }
 
-        if(!empty($request->password)){
-            if(Auth::attempt(['username' => $user->username, 'password' => $request->old_password])){
+        if (!empty($request->password)) {
+            if (Auth::attempt(['username' => $user->username, 'password' => $request->old_password])) {
                 $check['password'] = 'required|min:6|confirmed';
-            }else{
+            } else {
                 //return error
                 $validator = Validator::make($request->all(), $check);
                 $validator->errors()->add('old_password', 'Incorrect password');
@@ -82,8 +83,59 @@ class ProfileController extends Controller
         $file = $request->file('photo');
         $img = Image::make($file);
         $img->resize(320, 320);
-        $img->save('public/images/users/user'.$request->user()->id.'.png');
+        $img->save('public/images/users/user' . $request->user()->id . '.png');
 
         return redirect('profile')->with('status', 'Profile updated!');
+    }
+
+    public function verify()
+    {
+        if (Auth::user()->verified) return redirect('home');
+
+        return view('user.verify', ['user' => Auth::user()]);
+    }
+
+    public function resendConfirmation(Request $request)
+    {
+        $activationCode = str_random(50);
+        $user = $request->user();
+        $user->update([
+            'activation_code' => $activationCode
+        ]);
+        Mail::send('emails.activation',
+            [
+                'code' => $activationCode,
+                'id' => $user->id,
+                'name' => $request->user()->first_name . ' ' . $user->last_name
+            ], function ($message) use ($user) {
+                $message->subject('eSurvey Verification');
+                $message->to($user->email);
+            });
+        return redirect('verify')->with('status', 'Confirmation Email sent!');
+    }
+
+    public function changeEmail(Request $request){
+
+        $this->validate($request, [
+            'email' => 'required|unique:users'
+        ]);
+
+        $email = $_GET['email'];
+        $activationCode = str_random(50);
+        $user = $request->user();
+        $user->update([
+            'activation_code' => $activationCode,
+            'email' => $email
+        ]);
+        Mail::send('emails.activation',
+            [
+                'code' => $activationCode,
+                'id' => $user->id,
+                'name' => $request->user()->first_name . ' ' . $user->last_name
+            ], function ($message) use ($user) {
+                $message->subject('eSurvey Verification');
+                $message->to($user->email);
+            });
+        return redirect('verify')->with('status', 'Confirmation Email sent to your new Email!');
     }
 }

@@ -320,7 +320,7 @@
                         }
                     },
                     legend: {
-                        show: false
+                        show: true
                     }
                 });
             }
