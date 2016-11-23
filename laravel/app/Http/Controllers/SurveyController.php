@@ -476,7 +476,11 @@ class SurveyController extends Controller
     public function summary($id)
     {
         $survey = Survey::find($id);
-        return view('survey.summary', ['survey' => $survey, 'adminMode' => false]);
+        return view('survey.summary', [
+            'survey' => $survey,
+            'adminMode' => false,
+            'option' => $survey->option,
+        ]);
     }
 
     public function changeOptions(Request $request, $id)
