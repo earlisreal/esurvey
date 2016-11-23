@@ -28,18 +28,21 @@
 
 @section('content')
     <script>
-        window.fbAsyncInit = function() {
+        window.fbAsyncInit = function () {
             FB.init({
-                appId      : '1763279543936020',
-                xfbml      : true,
-                version    : 'v2.7'
+                appId: '1763279543936020',
+                xfbml: true,
+                version: 'v2.7'
             });
         };
 
-        (function(d, s, id){
+        (function (d, s, id) {
             var js, fjs = d.getElementsByTagName(s)[0];
-            if (d.getElementById(id)) {return;}
-            js = d.createElement(s); js.id = id;
+            if (d.getElementById(id)) {
+                return;
+            }
+            js = d.createElement(s);
+            js.id = id;
             js.src = "//connect.facebook.net/en_US/sdk.js";
             fjs.parentNode.insertBefore(js, fjs);
         }(document, 'script', 'facebook-jssdk'));
@@ -47,21 +50,21 @@
 
     {{--<div id="fb-root"></div>--}}
     {{--<script>(function(d, s, id) {--}}
-            {{--var js, fjs = d.getElementsByTagName(s)[0];--}}
-            {{--if (d.getElementById(id)) return;--}}
-            {{--js = d.createElement(s); js.id = id;--}}
-            {{--js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1";--}}
-            {{--fjs.parentNode.insertBefore(js, fjs);--}}
-        {{--}(document, 'script', 'facebook-jssdk'));</script>--}}
+    {{--var js, fjs = d.getElementsByTagName(s)[0];--}}
+    {{--if (d.getElementById(id)) return;--}}
+    {{--js = d.createElement(s); js.id = id;--}}
+    {{--js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1";--}}
+    {{--fjs.parentNode.insertBefore(js, fjs);--}}
+    {{--}(document, 'script', 'facebook-jssdk'));</script>--}}
 
     {{--<div id="fb-root"></div>--}}
     {{--<script>(function(d, s, id) {--}}
-            {{--var js, fjs = d.getElementsByTagName(s)[0];--}}
-            {{--if (d.getElementById(id)) return;--}}
-            {{--js = d.createElement(s); js.id = id;--}}
-            {{--js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.7&appId=1763279543936020";--}}
-            {{--fjs.parentNode.insertBefore(js, fjs);--}}
-        {{--}(document, 'script', 'facebook-jssdk'));</script>--}}
+    {{--var js, fjs = d.getElementsByTagName(s)[0];--}}
+    {{--if (d.getElementById(id)) return;--}}
+    {{--js = d.createElement(s); js.id = id;--}}
+    {{--js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.7&appId=1763279543936020";--}}
+    {{--fjs.parentNode.insertBefore(js, fjs);--}}
+    {{--}(document, 'script', 'facebook-jssdk'));</script>--}}
 
     <div class="col-lg-offset-3 col-lg-6 col-xs-12">
         <div class="panel panel-primary">
@@ -69,9 +72,11 @@
                 <h3 class="panel-title">Share Your Survey</h3>
             </div>
             <div class="panel-body">
-                <p>Survey Status: <strong id="survey-status">{{ $survey->option->open ? "Open" : "Closed" }}</strong> </p>
+                <p>Survey Status: <strong id="survey-status">{{ $survey->option->open ? "Open" : "Closed" }}</strong>
+                </p>
                 <div class="form-group">
-                    <button class="btn btn-primary" id="close-open-survey">{{ $survey->option->open ? "Close Survey" : "Open Survey" }}</button>
+                    <button class="btn btn-primary"
+                            id="close-open-survey">{{ $survey->option->open ? "Close Survey" : "Open Survey" }}</button>
                 </div>
                 <div class="form-group">
                     <label for="url">Survey URL</label>
@@ -111,14 +116,25 @@
             <div class="box-body">
                 <form class="form-horizontal">
                     <div class="form-group">
+                        <label for="response_message" class="col-xs-4">Message for Response:</label>
+                        <div class="radio col-xs-8">
+                            <textarea name="response_message" id="response_message" class="form-control" rows="3">{{ $survey->option->response_message }}</textarea>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="form-group">
                         <label class="col-xs-4">Multiple Responses:</label>
                         <div class="radio col-xs-8">
                             <label>
-                                <input id="multiple-off" type="radio" name="multiple-responses" {{ $survey->option->multiple_responses ? '' : 'checked' }}>
+                                <input id="multiple-off" type="radio"
+                                       name="multiple-responses" {{ $survey->option->multiple_responses ? '' : 'checked' }}>
                                 Off
                             </label>
                             <label>
-                                <input type="radio" name="multiple-responses" {{ $survey->option->multiple_responses ? 'checked' : '' }}>
+                                <input type="radio"
+                                       name="multiple-responses" {{ $survey->option->multiple_responses ? 'checked' : '' }}>
                                 On
                             </label>
                         </div>
@@ -127,50 +143,64 @@
                     <hr>
 
                     <div class="form-group">
-                        <label class="col-xs-4">Target Responses: <br> <small>Close After reaching the target number</small></label>
+                        <label class="col-xs-4">Target Responses: <br>
+                            <small>Close After reaching the target number</small>
+                        </label>
                         <div class="radio col-xs-4">
                             <label>
-                                <input id="target-off" type="radio" name="target-responses" {{ is_null($survey->option->target_responses) ? 'checked' : '' }}>
+                                <input id="target-off" type="radio"
+                                       name="target-responses" {{ is_null($survey->option->target_responses) ? 'checked' : '' }}>
                                 Off
                             </label>
 
                             <label>
-                                <input type="radio" name="target-responses" {{ is_null($survey->option->target_responses) ? '' : 'checked' }}>
+                                <input type="radio"
+                                       name="target-responses" {{ is_null($survey->option->target_responses) ? '' : 'checked' }}>
                                 On
                             </label>
                         </div>
                         <div class="col-xs-4">
-                            <input id="target-number" type="number" value="{{ $survey->option->target_responses }}" class="form-control {{ is_null($survey->option->target_responses) ? 'collapse' : '' }}" placeholder="Enter a number" min="{{ $survey->responses->count() + 1 }}">
+                            <input id="target-number" type="number" value="{{ $survey->option->target_responses }}"
+                                   class="form-control {{ is_null($survey->option->target_responses) ? 'collapse' : '' }}"
+                                   placeholder="Enter a number" min="{{ $survey->responses->count() + 1 }}">
                         </div>
                     </div>
 
                     <hr>
 
                     <div class="form-group">
-                        <label class="col-xs-4">Date Close: <br> <small>Open Survey until date</small></label>
+                        <label class="col-xs-4">Date Close: <br>
+                            <small>Open Survey until date</small>
+                        </label>
                         <div class="radio col-xs-4">
                             <label>
-                                <input id="date-off" type="radio" name="date-close" {{ is_null($survey->option->date_close) ? 'checked' : '' }}>
+                                <input id="date-off" type="radio"
+                                       name="date-close" {{ is_null($survey->option->date_close) ? 'checked' : '' }}>
                                 Off
                             </label>
                             <label>
-                                <input type="radio" name="date-close" {{ is_null($survey->option->date_close) ? '' : 'checked' }}>
+                                <input type="radio"
+                                       name="date-close" {{ is_null($survey->option->date_close) ? '' : 'checked' }}>
                                 On
                             </label>
                         </div>
-                        <div class="col-xs-4 {{ is_null($survey->option->date_close) ? 'collapse' : '' }}" id="closing-date-div">
+                        <div class="col-xs-4 {{ is_null($survey->option->date_close) ? 'collapse' : '' }}"
+                             id="closing-date-div">
                             <div class="input-group">
                                 <div class="input-group-addon">
                                     <i class="fa fa-calendar"></i>
                                 </div>
-                                <input type="text" id="closing-date" class="form-control" value="{{ $survey->option->date_close }}">
+                                <input type="text" id="closing-date" class="form-control"
+                                       value="{{ $survey->option->date_close }}">
                             </div>
                         </div>
                     </div>
                 </form>
             </div>
             <div class="box-footer">
-                <button id="apply-btn" class="btn btn-primary pull-right" disabled style="margin-left: 15px"><i class="fa fa-btn fa-cog"></i>Apply Changes</button>
+                <button id="apply-btn" class="btn btn-primary pull-right" disabled style="margin-left: 15px"><i
+                            class="fa fa-btn fa-cog"></i>Apply Changes
+                </button>
             </div>
         </div>
 
@@ -183,7 +213,7 @@
 
 
 @section('scripts')
-    <script>window.twttr = (function(d, s, id) {
+    <script>window.twttr = (function (d, s, id) {
             var js, fjs = d.getElementsByTagName(s)[0],
                     t = window.twttr || {};
             if (d.getElementById(id)) return t;
@@ -193,7 +223,7 @@
             fjs.parentNode.insertBefore(js, fjs);
 
             t._e = [];
-            t.ready = function(f) {
+            t.ready = function (f) {
                 t._e.push(f);
             };
 

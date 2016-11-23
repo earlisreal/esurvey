@@ -21,6 +21,7 @@ class CreateSurveyOptionsTable extends Migration
                 ->onUpdate('cascade');
             $table->boolean('open')->default(true);
             $table->text('closed_message')->nullable();
+            $table->text('response_message')->nullable();
             $table->boolean('multiple_responses')->default(false);
             $table->integer('target_responses')->nullable();
             $table->date('date_close')->nullable();

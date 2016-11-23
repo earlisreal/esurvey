@@ -31,6 +31,7 @@ $('#apply-btn').click(function () {
         },
         type: "PATCH",
         data: {
+            response_message: $('#response_message').val(),
             multiple_responses: $('#multiple-off').prop('checked') ? 0 : 1,
             date_close: $('#date-off').prop('checked') ? null : $('#closing-date').val(),
             target_responses: $('#target-off').prop('checked') ? null : $('#target-number').val()
@@ -80,6 +81,10 @@ $('#target-number').change(function () {
 
 $('#closing-date').change(function () {
     enableApplyBtn($(this).val() != initialDate);
+});
+
+$('#response_message').keyup(function () {
+    enableApplyBtn(true);
 });
 
 function enableApplyBtn(apply){

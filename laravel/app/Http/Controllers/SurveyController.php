@@ -482,6 +482,7 @@ class SurveyController extends Controller
     public function changeOptions(Request $request, $id)
     {
         Survey::find($id)->option->update([
+            'response_message' => $request->response_message,
             'multiple_responses' => $request->multiple_responses,
             'target_responses' => empty($request->target_responses) ? null : $request->target_responses,
             'date_close' => empty($request->date_close) ? null : Carbon::parse($request->date_close)->toDateString(),

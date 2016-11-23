@@ -136,7 +136,7 @@ class ResponseController extends Controller
 //            'test' => $test,
 //        ]);
 
-        return redirect('answer/'.$id)->with('thankyou', 'Thank You For paying your time!');
+        return redirect('answer/'.$id)->with('thankyou', $survey->option->response_message);
     }
 
 }
