@@ -7,6 +7,7 @@
 @section('style')
     <!-- Date Picker -->
     <link rel="stylesheet" href="{{ asset('public/plugins/datepicker/datepicker3.css') }}">
+    <link rel="stylesheet" href="{{ asset('public/plugins/bootstrapformhelpers/css/bootstrap-formhelpers.min.css') }}">
 @endsection
 
 @section('content')
@@ -110,7 +111,21 @@
 
                             {{--TODO--}}
 
-                            {{--<hr>--}}
+                            <hr>
+
+                            <div class="form-group{{ $errors->has('password_confirmation') ? ' has-error' : '' }}">
+                                <label for="country" class="col-md-4 control-label">Country</label>
+
+                                <div class="col-md-6">
+                                    <select id="country" class="form-control bfh-countries"></select>
+
+                                    @if ($errors->has('password_confirmation'))
+                                        <span class="help-block">
+                                        <strong>{{ $errors->first('password_confirmation') }}</strong>
+                                    </span>
+                                    @endif
+                                </div>
+                            </div>
 
                             {{--<div class="form-group{{ $errors->has('last_name') ? ' has-error' : '' }}">--}}
                                 {{--<label for="last_name" class="col-md-4 control-label">Gender</label>--}}
@@ -183,10 +198,13 @@
 
 @section('scripts')
     <script src="{{ asset('public/plugins/datepicker/bootstrap-datepicker.js') }}"></script>
+    <script src="{{ asset('public/plugins/bootstrapformhelpers/js/bootstrap-formhelpers.js') }}"></script>
+    <script src="{{ asset('public/plugins/bootstrapformhelpers/js/bootstrap-formhelpers-countries.js') }}"></script>
     <script>
         $('#birthday').datepicker({
             autoclose: true,
         });
-
+        $('#country').bfhselectbox('toggle')
+        $('#country').bfhcountries({country: 'US'});
     </script>
 @endsection
