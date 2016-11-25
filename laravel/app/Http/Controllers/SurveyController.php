@@ -509,4 +509,8 @@ class SurveyController extends Controller
         ]);
     }
 
+    public function settings($id){
+        return view('survey.settings', ['survey' => Survey::findOrFail($id)]);
+    }
+
 }

@@ -67,9 +67,15 @@ Route::patch('/create/{id}', 'SurveyController@publish');
 
 Route::get('/share/{id}', 'SurveyController@share');
 
-Route::post('/share/{id}', 'SurveyController@update');
+/*************************************************************************************************************
+ *                                          SETTINGS                                                         *
+ *************************************************************************************************************/
 
-Route::patch('/share/{id}', 'SurveyController@changeOptions');
+Route::get('/settings/{id}', 'SurveyController@settings');
+
+Route::post('/settings/{id}', 'SurveyController@update');
+
+Route::patch('/settings/{id}', 'SurveyController@changeOptions');
 
 
 /*************************************************************************************************************

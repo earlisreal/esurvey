@@ -41,13 +41,15 @@
 
     <link rel="stylesheet" href="{{ asset('public/plugins/AdminLTE-2.3.5/dist/css/AdminLTE.min.css') }}">
 
-    <link rel="stylesheet" href="{{ asset('public/css/sidebar.css') }}">
+    {{--<link rel="stylesheet" href="{{ asset('public/css/sidebar.css') }}">--}}
+
+    <link rel="stylesheet" href="{{ asset('public/css/app-sidebar.css') }}">
 
     <!-- AdminLTE Skins. Choose a skin from the css/skins
          folder instead of downloading all of them to reduce the load. -->
     <link rel="stylesheet" href="{{ asset('public/plugins/AdminLTE-2.3.5/dist/css/skins/skin-esurvey.css') }}">
 
-{{-- <link href="{{ elixir('css/app.css') }}" rel="stylesheet"> --}}
+    {{-- <link href="{{ elixir('css/app.css') }}" rel="stylesheet"> --}}
 
 <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -69,7 +71,8 @@
             <div class="container">
 
                 <div class="navbar-header">
-                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse">
+                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+                            data-target="#navbar-collapse">
                         <i class="fa fa-bars"></i>
                     </button>
                 </div>
@@ -80,11 +83,13 @@
                     @if (Auth::user())
 
                         <!-- Create Survey, Display in all pages -->
-                            <li><a href="{{ url('/create') }}" id="create-survey" class="btn-facebook"><i class="fa fa-plus"></i> Create Survey</a></li>
+                            <li><a href="{{ url('/create') }}" id="create-survey" class="btn-facebook"><i
+                                            class="fa fa-plus"></i> Create Survey</a></li>
                             <li><a href="{{ url('mysurveys') }}"><i class="fa fa-edit"></i> My Surveys</a></li>
                             <li><a href="{{ url('templates') }}"><i class="fa fa-list-alt"></i> Templates</a></li>
                             <li class="dropdown">
-                                <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-area-chart"></i> Reports <span class="caret"></span></a>
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i
+                                            class="fa fa-area-chart"></i> Reports <span class="caret"></span></a>
                                 <ul class="dropdown-menu" role="menu">
                                     <li><a href="#">Summary</a></li>
                                     <li><a href="#">User Responses</a></li>
@@ -123,7 +128,7 @@
 <!-- content goes here -->
     <div class="content-wrapper with-sidebar">
 
-        <div class="container">
+        <div class="container no-padding">
             {{--<section class="content-header">--}}
             {{--<h1>--}}
             {{--@yield('header-text')--}}
@@ -134,9 +139,63 @@
             {{--</section>--}}
 
 
-            @yield('content-header')
+            <div class="main-page">
+                <div class="sidebar">
+                    <div class="text-center" style="margin-top:10px; margin-bottom: 10px;">
+                        <a class="text-center" href="{{ url('mysurveys') }}">
+                            <img src="{{ asset('public/images/side-logo.png') }}" alt="logo" style="height:90px;">
+                        </a>
+                    </div>
+                    <!-- sidebar menu: : style can be found in sidebar.less -->
+                    <ul class="sidebar-menu">
+                        <li class="header">SURVEY NAVIGATION</li>
+                        <li><a href="{{ url('survey/'.$survey->id) }}"><i class="fa fa-dashboard"></i> Dashboard</a></li>
+                        @if($survey->published)
+                        <li><a href=""><i class="fa fa-eye"></i> Preview</a></li>
+                        @else
+                            <li><a href="{{ url('create/'.$survey->id) }}"><i class="fa fa-edit"></i> Edit</a></li>
+                            @endif
+                        <li><a href="{{ url('share/'.$survey->id) }}"><i class="fa fa-share-alt"></i> Share</a></li>
+                        <li><a href="{{ url('settings/'.$survey->id) }}"><i class="fa fa-wrench"></i> Settings</a></li>
+                        <li class="treeview">
+                            <a href="">
+                                <i class="fa fa-line-chart"></i>
+                                <span>Analyze</span>
+                                <span class="pull-right-container">
+                             <i class="fa fa-angle-left pull-right"></i>
+                        </span>
+                            </a>
+                            <ul class="treeview-menu">
+                                <li><a href="{{ url('analyze/'.$survey->id) }}"><i class="fa fa-pie-chart"></i> Summary</a></li>
+                                <li><a href="{{ url('analyze/'.$survey->id.'/user') }}"><i class="fa fa-users"></i> Individual Responses</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="{{ url('analyze/'.$survey->id.'/result.pdf') }}" target="_blank"><i class="fa fa-file-pdf-o"></i> Quick Report</a></li>
+                        <li class="treeview">
+                            <a href="">
+                                <i class="fa fa-gears"></i>
+                                <span>Other</span>
+                                <span class="pull-right-container">
+                             <i class="fa fa-angle-left pull-right"></i>
+                        </span>
+                            </a>
+                            <ul class="treeview-menu">
+                                <li><a href=""><i class="fa fa-copy"></i> Duplicate Survey</a></li>
+                                <li><a href=""><i class="fa fa-remove"></i> Delete</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+                <div class="main-content">
 
-            @yield('content')
+                    @yield('content-header')
+
+                    <div class="content">
+                        @yield('content')
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 

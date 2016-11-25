@@ -1,4 +1,4 @@
-@extends($adminMode ? 'layouts.admin' : 'layouts.app')
+@extends($adminMode ? 'layouts.admin' : 'layouts.app-with-sidebar')
 
 @if($adminMode)
     @section('content-header')
@@ -91,7 +91,7 @@
 
 
 @if(!$adminMode)
-<div class="col-xs-offset-1 col-xs-10">
+<div class="">
 @endif
     <?php $questionNo = 1; ?>
     @foreach($survey->pages()->orderBy('page_no')->get() as $page)

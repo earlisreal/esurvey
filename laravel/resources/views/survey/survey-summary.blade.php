@@ -16,7 +16,7 @@ if (!empty($_GET['start']) && !empty($_GET['end'])) {
 
 ?>
 
-@extends('layouts.app')
+@extends('layouts.app-with-sidebar')
 
 @section('header')
     @include('common.header')

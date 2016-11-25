@@ -4,68 +4,59 @@
     @include('common.header')
 @endsection
 
+@section('style')
+    <link rel="stylesheet" href="{{ asset('public/css/app-sidebar.css') }}">
+@endsection
+
 {{--@section('sidebar')--}}
 {{--@include('common.sidebar')--}}
 {{--@endsection--}}
 
 @section('content')
-    <div class="row" style=" display: table;">
-        <div class="col-sm-3 col-md-2 no-padding" style="float: none;
-    display: table-cell;
-    vertical-align: top;">
-            <div class="slimScrollDiv sidebar"
-                 style="position: relative; overflow: hidden; width: auto; height: 372px;">
-                <div class="sidebar" id="scrollspy" style="height: 372px; overflow: hidden; width: auto;">
-
-                    <div class="text-center" style="margin-top:10px; margin-bottom: 10px;">
-                        <a class="text-center" href="{{ url('mysurveys') }}">
-                            <img src="{{ asset('public/images/side-logo.png') }}" alt="logo" style="height:90px;">
-                        </a>
-                    </div>
-                    <!-- sidebar menu: : style can be found in sidebar.less -->
-                    <ul class="nav sidebar-menu">
-                        <li class="text-center no-padding">
-                            <a href="/" style="color: #169ef4;">esurvey/answer/69</a>
-                        </li>
-                        <li>
-                            <span class="sidebar-info">Created</span>
-                            <span class="pull-right">12</span>
-                        </li>
-                        <li>
-                            <span class="sidebar-info">Published</span>
-                            <span class="pull-right">12</span>
-                        </li>
-                        <li>
-                            <span class="sidebar-info">First Answer</span>
-                            <span class="pull-right">12</span>
-                        </li>
-                        <li>
-                            <span class="sidebar-info">Pages</span>
-                            <span class="pull-right">12</span>
-                        </li>
-                        <li>
-                            <span class="sidebar-info">Question</span>
-                            <span class="pull-right">12</span>
-                        </li>
-                        <li>
-                            <span class="sidebar-info">Link</span>
-                            <span class="pull-right">12</span>
-                        </li>
-                        <li>
-                            <span class="sidebar-info">Target Responses</span>
-                            <span class="pull-right">12</span>
-                        </li>
-                        <li>
-                            <span class="sidebar-info">Date Close</span>
-                            <span class="pull-right">12</span>
-                        </li>
-                    </ul>
-                </div>
+    <div class="main-page">
+        <div class="sidebar">
+            <div class="text-center" style="margin-top:10px; margin-bottom: 10px;">
+                <a class="text-center" href="{{ url('mysurveys') }}">
+                    <img src="{{ asset('public/images/side-logo.png') }}" alt="logo" style="height:90px;">
+                </a>
             </div>
+            <!-- sidebar menu: : style can be found in sidebar.less -->
+            <ul class="sidebar-menu">
+                <li class="header">MAIN NAVIGATION</li>
+                <li class="active"><a href=""><i class="fa fa-dashboard"></i> Dashboard</a></li>
+                <li><a href=""><i class="fa fa-edit"></i> Edit</a></li>
+                <li><a href=""><i class="fa fa-share-alt"></i> Share</a></li>
+                <li><a href=""><i class="fa fa-wrench"></i> Settings</a></li>
+                <li class="treeview">
+                    <a href="">
+                        <i class="fa fa-line-chart"></i>
+                        <span>Analyze</span>
+                        <span class="pull-right-container">
+                             <i class="fa fa-angle-left pull-right"></i>
+                        </span>
+                    </a>
+                    <ul class="treeview-menu">
+                        <li><a href=""><i class="fa fa-pie-chart"></i> Summary</a></li>
+                        <li><a href=""><i class="fa fa-users"></i> Individual Responses</a></li>
+                    </ul>
+                </li>
+                <li><a href=""><i class="fa fa-file-pdf-o"></i> Quick Report</a></li>
+                <li class="treeview">
+                    <a href="">
+                        <i class="fa fa-gears"></i>
+                        <span>Other</span>
+                        <span class="pull-right-container">
+                             <i class="fa fa-angle-left pull-right"></i>
+                        </span>
+                    </a>
+                    <ul class="treeview-menu">
+                        <li><a href=""><i class="fa fa-copy"></i> Duplicate Survey</a></li>
+                        <li><a href=""><i class="fa fa-remove"></i> Delete</a></li>
+                    </ul>
+                </li>
+            </ul>
         </div>
-        <div class="col-sm-9 col-md-10 no-padding main-content" style="float: none;
-    display: table-cell;
-    vertical-align: top;">
+        <div class="main-content">
             <section class="content-header">
                 <h1>
                     Top Navigation

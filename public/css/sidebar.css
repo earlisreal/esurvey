@@ -12,9 +12,10 @@
 }
 
 .sidebar {
-    border: 1px solid #e3e3e3;
+    border-right: 1px solid #e3e3e3;
+    border-left: 1px solid #e3e3e3;
     /*background-color: #222d32;*/
-    /*min-height: 100%;*/
+    min-height: 100%;
     overflow-x: hidden;
     overflow-y: auto;
 }

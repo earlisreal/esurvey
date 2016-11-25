@@ -1,6 +1,6 @@
 <?php $responseCount = $survey->responses()->count(); ?>
 
-@extends('layouts.app')
+@extends('layouts.app-with-sidebar')
 
 @section('header')
     @include('common.header')
