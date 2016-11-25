@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 use Illuminate\Support\Facades\Hash;
@@ -36,7 +37,12 @@ class ProfileController extends Controller
         $user = $request->user();
         $check = [
             'first_name' => 'required|max:255',
-            'last_name' => 'required|max:255'
+            'last_name' => 'required|max:255',
+            'gender' => 'required|max:255',
+            'birthday' => 'required|max:255',
+            'country' => 'required|max:255',
+            'state' => 'required|max:255',
+            'city' => 'required|max:255',
         ];
 
 //        $this->validate($request, [
@@ -51,6 +57,7 @@ class ProfileController extends Controller
         }
 
         if (!empty($request->password)) {
+            Log::info("password changed");
             if (Auth::attempt(['username' => $user->username, 'password' => $request->old_password])) {
                 $check['password'] = 'required|min:6|confirmed';
             } else {
@@ -71,8 +78,19 @@ class ProfileController extends Controller
             'first_name' => $request->first_name,
             'last_name' => $request->last_name,
             'email' => $request->email,
-            'password' => Hash::make($request->password),
+            'gender' => $request['gender'],
+            'phone' => $request->phone,
+            'country' => $request->country,
+            'state' => $request->state,
+            'city' => $request->city,
+            'birthday' => Carbon::parse($request->birthday)->toDateString(),
         ])->save();
+
+        if (!empty($request->password)) {
+            $user->fill([
+                'password' => Hash::make($request->password),
+            ])->save();
+        }
 
         return redirect('profile')->with('status', 'Profile updated!');
     }
@@ -114,7 +132,8 @@ class ProfileController extends Controller
         return redirect('verify')->with('status', 'Confirmation Email sent!');
     }
 
-    public function changeEmail(Request $request){
+    public function changeEmail(Request $request)
+    {
 
         $this->validate($request, [
             'email' => 'required|unique:users'

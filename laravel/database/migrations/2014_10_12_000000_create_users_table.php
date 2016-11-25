@@ -19,6 +19,12 @@ class CreateUsersTable extends Migration
             $table->string('last_name');
             $table->string('email')->unique();
             $table->string('password');
+            $table->string('phone');
+            $table->string('gender');
+            $table->date('birthday');
+            $table->string('country');
+            $table->string('state');
+            $table->string('city');
             $table->integer('role_id')->unsigned()->nullable()->default(2);
             $table->foreign('role_id')
                 ->references('id')->on('user_roles')

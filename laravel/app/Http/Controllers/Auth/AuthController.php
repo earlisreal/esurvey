@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\User;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Mail;
 use Validator;
 use App\Http\Controllers\Controller;
@@ -57,6 +58,11 @@ class AuthController extends Controller
             'last_name' => 'required|max:255',
             'email' => 'required|email|max:255|unique:users',
             'password' => 'required|min:6|confirmed',
+            'gender' => 'required|max:255',
+            'birthday' => 'required|max:255',
+            'country' => 'required|max:255',
+            'state' => 'required|max:255',
+            'city' => 'required|max:255',
         ]);
     }
 
@@ -75,6 +81,12 @@ class AuthController extends Controller
             'first_name' => $data['first_name'],
             'email' => $data['email'],
             'password' => bcrypt($data['password']),
+            'gender' => $data['gender'],
+            'phone' => $data['phone'],
+            'country' => $data['country'],
+            'state' => $data['state'],
+            'city' => $data['city'],
+            'birthday' => Carbon::parse($data['birthday'])->toDateString(),
             'activation_code' => $activationCode,
         ]);
         Mail::send('emails.activation',
@@ -82,9 +94,9 @@ class AuthController extends Controller
                 'code' => $activationCode,
                 'id' => $user->id,
                 'name' => $user->first_name .' ' .$user->last_name
-            ], function($message){
+            ], function($message) use ($user){
                 $message->subject('eSurvey Verification');
-                $message->to('earl_savadera@yahoo.com');
+                $message->to($user->email);
             });
         return $user;
     }
