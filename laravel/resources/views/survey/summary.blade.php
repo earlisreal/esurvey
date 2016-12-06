@@ -234,7 +234,7 @@ foreach ($survey->pages as $page) {
                                             Share
                                         </a>
 
-                                        <a href="{{ url('share/'.$survey->id) }}" class="btn btn-warning btn-dashboard">
+                                        <a href="{{ url('settings/'.$survey->id) }}" class="btn btn-warning btn-dashboard">
                                             <i class="fa fa-wrench fa-5x"></i>
                                             <br>
                                             Settings

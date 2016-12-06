@@ -15,11 +15,12 @@ class SurveyTemplateController extends Controller
 
     public function __construct()
     {
-        $this->middleware('read:templates');
+
     }
 
     public function index()
     {
+        $this->middleware('read:templates');
         $user = Auth::user();
         return view('admin.surveyTemplate', [
             'user' => $user,
@@ -31,6 +32,7 @@ class SurveyTemplateController extends Controller
 
     public function show($id)
     {
+        $this->middleware('read:templates');
         $survey = Survey::find($id);
         return view('survey.edit', ['survey' => $survey, 'adminMode' => true]);
     }

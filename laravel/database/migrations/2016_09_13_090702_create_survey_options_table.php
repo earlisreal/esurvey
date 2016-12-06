@@ -24,6 +24,7 @@ class CreateSurveyOptionsTable extends Migration
             $table->text('response_message')->nullable();
             $table->boolean('multiple_responses')->default(false);
             $table->integer('target_responses')->nullable();
+            $table->boolean('register_required')->default(false);
             $table->date('date_close')->nullable();
         });
     }

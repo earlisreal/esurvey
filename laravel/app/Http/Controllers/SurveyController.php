@@ -46,28 +46,28 @@ class SurveyController extends Controller
     {
 
         Log::info($request);
-        if($request->create_from == "existing"){
-            $this->validate($request,[
+        if ($request->create_from == "existing") {
+            $this->validate($request, [
                 'existing_survey' => 'required',
             ]);
 
             $survey = Survey::find($request->existing_survey);
             $newSurvey = $survey->replicate();
-            if($request->new_title != null){
+            if ($request->new_title != null) {
                 $newSurvey->new_title = $request->new_title;
             }
             $newSurvey->published = false;
             $newSurvey->save();
-            foreach ($survey->pages as $page){
+            foreach ($survey->pages as $page) {
                 $newPage = $page->replicate();
                 $newPage->survey_id = $newSurvey->id;
                 $newPage->save();
                 $this->replicateQuestions($page, $newPage);
             }
 
-            return redirect('/create/' .$newSurvey->id);
-        }elseif($request->create_from == "scratch"){
-            $this->validate($request,[
+            return redirect('/create/' . $newSurvey->id);
+        } elseif ($request->create_from == "scratch") {
+            $this->validate($request, [
                 'survey_title' => 'required|max:250',
                 'category' => $request->is_template ? 'required' : 'max:250',
             ]);
@@ -80,16 +80,16 @@ class SurveyController extends Controller
 
             $survey = new Survey;
 
-            DB::transaction(function() use ($request, $survey){
+            DB::transaction(function () use ($request, $survey) {
                 $category = $request->category;
-                if($request->category == -1){
+                if ($request->category == -1) {
                     $category = null;
                 }
 
                 $survey->survey_title = $request->survey_title;
                 $survey->user()->associate($request->user());
                 $survey->category()->associate($category);
-                if($request->is_template){
+                if ($request->is_template) {
                     $survey->is_template = true;
                 }
                 $survey->save();
@@ -99,13 +99,13 @@ class SurveyController extends Controller
                 ]);
 
             });
-            if($request->is_template){
-                return redirect('admin/templates/create/' .$survey->id);
-            }else{
-                return redirect('/create/' .$survey->id);
+            if ($request->is_template) {
+                return redirect('admin/templates/create/' . $survey->id);
+            } else {
+                return redirect('/create/' . $survey->id);
             }
-        }elseif($request->create_from == "template"){
-            $this->validate($request,[
+        } elseif ($request->create_from == "template") {
+            $this->validate($request, [
                 'survey_template' => 'required',
             ]);
 
@@ -114,21 +114,21 @@ class SurveyController extends Controller
             $newSurvey->user()->associate($request->user());
             $newSurvey->published = false;
             $newSurvey->is_template = false;
-            if($request->is_template){
+            if ($request->is_template) {
                 $survey->is_template = true;
             }
             $newSurvey->save();
-            foreach ($survey->pages as $page){
+            foreach ($survey->pages as $page) {
                 $newPage = $page->replicate();
                 $newPage->survey_id = $newSurvey->id;
                 $newPage->save();
                 $this->replicateQuestions($page, $newPage);
             }
 
-            if($request->is_template){
-                return redirect('admin/templates/create/' .$survey->id);
+            if ($request->is_template) {
+                return redirect('admin/templates/create/' . $survey->id);
             }
-            return redirect('/create/' .$newSurvey->id);
+            return redirect('/create/' . $newSurvey->id);
         }
 
 
@@ -146,7 +146,7 @@ class SurveyController extends Controller
         $page = SurveyPage::find($request->page_id);
         $type = QuestionType::find($request->question_type);
 
-        switch ($request->manipulation_method){
+        switch ($request->manipulation_method) {
             case "add":
                 $question = new Question();
                 $question->question_title = $request->question_title;
@@ -160,10 +160,9 @@ class SurveyController extends Controller
                 $question->questiontype()->associate($type);
 
 
-
-                DB::transaction(function() use($request, $question, $type){
+                DB::transaction(function () use ($request, $question, $type) {
                     $question->save();
-                    if($type->type == "Rating Scale"){
+                    if ($type->type == "Rating Scale") {
                         $option = new QuestionOption();
                         $option->max_rating = $request->max_rating;
                         $option->question()->associate($question);
@@ -175,7 +174,7 @@ class SurveyController extends Controller
 
             case "edit":
                 $question = Question::find($request->question_id);
-                DB::transaction(function() use($request, $question, $type){
+                DB::transaction(function () use ($request, $question, $type) {
                     QuestionChoice::where('question_id', $request->question_id)->delete();
                     QuestionOption::where('question_id', $request->question_id)->delete();
                     $question->update([
@@ -183,7 +182,7 @@ class SurveyController extends Controller
                         'question_type_id' => $request->question_type,
                         'is_mandatory' => $request->is_mandatory,
                     ]);
-                    if($type->type == "Rating Scale"){
+                    if ($type->type == "Rating Scale") {
                         $option = new QuestionOption();
                         $option->max_rating = $request->max_rating;
                         $option->question()->associate($question);
@@ -198,9 +197,10 @@ class SurveyController extends Controller
         return view('ajax.question', ['question' => $question]);
     }
 
-    private function saveChoices($type, $question, $choices){
-        if($type->has_choices){
-            foreach ($choices as $label){
+    private function saveChoices($type, $question, $choices)
+    {
+        if ($type->has_choices) {
+            foreach ($choices as $label) {
                 $choice = new QuestionChoice();
                 $choice->label = $label;
                 $choice->question()->associate($question);
@@ -209,28 +209,29 @@ class SurveyController extends Controller
         }
     }
 
-    public function manipulateSurvey($id, Request $request){
+    public function manipulateSurvey($id, Request $request)
+    {
         $survey = Survey::find($id);
-        switch ($request->action){
+        switch ($request->action) {
             case 'add_page':
                 $page = new SurveyPage();
-                DB::transaction(function () use($survey, $request, $page){
+                DB::transaction(function () use ($survey, $request, $page) {
                     //SORT PAGE NUMBERS
-                    $newPage =  $request->page_no + 1;
+                    $newPage = $request->page_no + 1;
                     SurveyPage::where('survey_id', $survey->id)
-                                ->where('page_no', '>=', $newPage)
-                                ->increment('page_no');
+                        ->where('page_no', '>=', $newPage)
+                        ->increment('page_no');
                     $page->page_no = $newPage;
                     $page->survey()->associate($survey);
                     $page->save();
                 });
 
-               /* return view('ajax.page', [
-                    'page' => $page,
-                    'survey' => $survey,
-                    'question_types' => $this->getQuestionTypes()
-                ]);*/
-               return json_encode(array("id" => $page->id));
+                /* return view('ajax.page', [
+                     'page' => $page,
+                     'survey' => $survey,
+                     'question_types' => $this->getQuestionTypes()
+                 ]);*/
+                return json_encode(array("id" => $page->id));
                 break;
             case 'edit_page_title':
                 SurveyPage::find($request->page_id)
@@ -249,11 +250,11 @@ class SurveyController extends Controller
                 return 'earl is real';
                 break;
             case 'move_question':
-                return DB::transaction(function () use ($request, $survey){
+                return DB::transaction(function () use ($request, $survey) {
                     $newOrder = 1;
                     $newPage = $request->target_page_id;
 
-                    if($request->target_id != null){
+                    if ($request->target_id != null) {
                         $newOrder = $this->adjustQuestion($request->position, $request->target_id);
                     }
 
@@ -273,7 +274,7 @@ class SurveyController extends Controller
             case 'copy_question':
                 return DB::transaction(function () use ($request, $survey) {
                     $newOrder = 1;
-                    if($request->target_id != null){
+                    if ($request->target_id != null) {
                         $newOrder = $this->adjustQuestion($request->position, $request->target_id);
                     }
 
@@ -282,10 +283,10 @@ class SurveyController extends Controller
                     $newQuestion->survey_page_id = $request->target_page_id;
                     $newQuestion->order_no = $newOrder;
                     $newQuestion->save();
-                    if($question->questionType->has_choices){
+                    if ($question->questionType->has_choices) {
                         $this->replicateChoices($question, $newQuestion);
                     }
-                    if($question->questionType->type == "Rating Scale"){
+                    if ($question->questionType->type == "Rating Scale") {
                         $this->replicateOption($question, $newQuestion);
                     }
                     return view('ajax.question', ['question' => $newQuestion]);
@@ -305,10 +306,10 @@ class SurveyController extends Controller
                     $page = SurveyPage::find($request->page_id);
                     $targetPage = SurveyPage::find($request->target_id);
 
-                    if($request->position == "below"){
+                    if ($request->position == "below") {
                         $sign = '>';
                         $additional = 1;
-                    }else{ //above
+                    } else { //above
                         $sign = '>=';
                         $additional = 0;
                     }
@@ -333,23 +334,23 @@ class SurveyController extends Controller
 //                    $less = 0;
 //                    $increment = 0;
 
-                    if($page->page_no < $targetPage->page_no){
+                    if ($page->page_no < $targetPage->page_no) {
                         $firstSign = '>';
                         $increment = -1;
-                        if($request->position == "below"){
+                        if ($request->position == "below") {
                             $less = 0;
                             $secondSign = '<=';
-                        }else{ //above
+                        } else { //above
                             $less = -1;
                             $secondSign = '<';
                         }
-                    }else if($page->page_no >= $targetPage->page_no){
+                    } else if ($page->page_no >= $targetPage->page_no) {
                         $firstSign = '<';
                         $increment = 1;
-                        if($request->position == "below"){
+                        if ($request->position == "below") {
                             $less = 1;
                             $secondSign = '>';
-                        }else{ //above
+                        } else { //above
                             $less = 0;
                             $secondSign = '>=';
                         }
@@ -371,11 +372,12 @@ class SurveyController extends Controller
 //        $this->updateSurveyTimestamps($survey);
     }
 
-    private function adjustQuestion($position, $target_id){
+    private function adjustQuestion($position, $target_id)
+    {
         $sign = ($position == "above") ? '>=' : '>';
         $targetQuestion = Question::find($target_id);
         $newOrder = $targetQuestion->order_no;
-        if($position == "below"){
+        if ($position == "below") {
             $newOrder += 1;
         }
         $targetQuestion->surveyPage->questions()
@@ -384,12 +386,13 @@ class SurveyController extends Controller
         return $newOrder;
     }
 
-    private function replicateQuestions(SurveyPage $page, SurveyPage $newPage){
-        foreach($page->questions as $question){
+    private function replicateQuestions(SurveyPage $page, SurveyPage $newPage)
+    {
+        foreach ($page->questions as $question) {
             $newQuestion = $question->replicate();
             $newQuestion->survey_page_id = $newPage->id;
             $newQuestion->save();
-            if($question->questionType->type == "Rating Scale"){
+            if ($question->questionType->type == "Rating Scale") {
                 $newOption = $question->option->replicate();
                 $newOption->question_id = $newQuestion->id;
                 $newOption->save();
@@ -398,15 +401,17 @@ class SurveyController extends Controller
         }
     }
 
-    private function replicateChoices(Question $question, Question $newQuestion){
-        foreach($question->choices as $choice){
+    private function replicateChoices(Question $question, Question $newQuestion)
+    {
+        foreach ($question->choices as $choice) {
             $newChoice = $choice->replicate();
             $newChoice->question_id = $newQuestion->id;
             $newChoice->save();
         }
     }
 
-    private function replicateOption(Question $question, Question $newQuestion){
+    private function replicateOption(Question $question, Question $newQuestion)
+    {
         $newOption = $question->option->replicate();
         $newOption->question_id = $newQuestion->id;
         $newOption->save();
@@ -439,7 +444,7 @@ class SurveyController extends Controller
         $isTemplate = Survey::find($id)->is_template;
         Survey::destroy($id);
 
-        if($isTemplate){
+        if ($isTemplate) {
             return redirect('admin/templates');
         }
         return redirect('mysurveys');
@@ -457,17 +462,17 @@ class SurveyController extends Controller
             ]);
         });
 
-        if($survey->is_template){
+        if ($survey->is_template) {
             return redirect('admin/templates');
-        }else{
-            return redirect('/share/'.$id);
+        } else {
+            return redirect('/share/' . $id);
         }
     }
 
     public function share($id)
     {
         $survey = Survey::find($id);
-        if($survey->published)
+        if ($survey->published)
             return view('survey.share', ['survey' => $survey]);
         else
             return view('misc.publish-first', ['survey' => $survey]);
@@ -488,29 +493,39 @@ class SurveyController extends Controller
         Survey::find($id)->option->update([
             'response_message' => $request->response_message,
             'multiple_responses' => $request->multiple_responses,
-            'target_responses' => empty($request->target_responses) ? null : $request->target_responses,
-            'date_close' => empty($request->date_close) ? null : Carbon::parse($request->date_close)->toDateString(),
+            'target_responses' => $request->target_responses ? (empty($request->target_number) ? null : $request->target_number) : null,
+            'date_close' => $request->date_close ? (empty($request->closing_date) ? null : Carbon::parse($request->closing_date)->toDateString()) : null,
+            'register_required' => $request->register_required,
         ]);
 
-        return "ok";
+        return redirect()->back()->with('status', "Settings Successfully updated!");
     }
 
-    private function getSurveyCategories(){
-        return SurveyCategory::where('category', '!=', 'Other')->orderBy('category','asc')->get();
+    private function getSurveyCategories()
+    {
+        return SurveyCategory::where('category', '!=', 'Other')->orderBy('category', 'asc')->get();
     }
 
-    private function getQuestionTypes(){
+    private function getQuestionTypes()
+    {
         return QuestionType::all();
     }
 
-    private function updateSurveyTimestamps(Survey $survey){
+    private function updateSurveyTimestamps(Survey $survey)
+    {
         $survey->update([
             'updated_at' => Carbon::now(),
         ]);
     }
 
-    public function settings($id){
-        return view('survey.settings', ['survey' => Survey::findOrFail($id)]);
+    public function settings($id)
+    {
+        $survey = Survey::findOrFail($id);
+        if ($survey->option == null) return "No option";
+        return view('survey.settings', [
+            'survey' => $survey,
+            'option' => $survey->option
+        ]);
     }
 
 }

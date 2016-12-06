@@ -3,89 +3,95 @@ $(function () {
     $('#url').select();
 });
 
-console.log('target ' + targetInitial);
-console.log('multiple ' + multipleInitial);
-console.log('date ' + dateInitial);
+// console.log('target ' + targetInitial);
+// console.log('multiple ' + multipleInitial);
+// console.log('date ' + dateInitial);
 
 $('#url').on('focus',function () {
     $(this).select();
 });
 
 $('#closing-date').datepicker({
+    format: 'MM d, yyyy',
     autoclose: true,
     startDate: '+1d'
 });
 
-$('#target-number').focusout(function () {
-    if($(this).val() < minTarget){
-        $(this).val(minTarget);
-    }
-});
+// $('#target-number').focusout(function () {
+//     if($(this).val() < minTarget){
+//         $(this).val(minTarget);
+//     }
+// });
+//
+// $('#apply-btn').click(function () {
+//     console.log($('#multiple-off').prop('checked') ? 0 : 1);
+//     enableApplyBtn(false);
+//     $.ajax({
+//         beforeSend: function () {
+//             loadingToast("Saving Changes..");
+//         },
+//         type: "PATCH",
+//         data: {
+//             response_message: $('#response_message').val(),
+//             multiple_responses: $('#multiple-off').prop('checked') ? 0 : 1,
+//             date_close: $('#date-off').prop('checked') ? null : $('#closing-date').val(),
+//             target_responses: $('#target-off').prop('checked') ? null : $('#target-number').val()
+//         },
+//         success: function (data) {
+//             console.log(data);
+//             enableApplyBtn(false);
+//             successToast("Options Successfully Applied!");
+//             location.reload();
+//         },
+//         error: function (data) {
+//             console.log(data.responseText);
+//             enableApplyBtn(true);
+//             errorToast("Fail to apply Options");
+//         }
+//     });
+// });
 
-$('#apply-btn').click(function () {
-    console.log($('#multiple-off').prop('checked') ? 0 : 1);
-    enableApplyBtn(false);
-    $.ajax({
-        beforeSend: function () {
-            loadingToast("Saving Changes..");
-        },
-        type: "PATCH",
-        data: {
-            response_message: $('#response_message').val(),
-            multiple_responses: $('#multiple-off').prop('checked') ? 0 : 1,
-            date_close: $('#date-off').prop('checked') ? null : $('#closing-date').val(),
-            target_responses: $('#target-off').prop('checked') ? null : $('#target-number').val()
-        },
-        success: function (data) {
-            console.log(data);
-            enableApplyBtn(false);
-            successToast("Options Successfully Applied!");
-            location.reload();
-        },
-        error: function (data) {
-            console.log(data.responseText);
-            enableApplyBtn(true);
-            errorToast("Fail to apply Options");
-        }
-    });
-});
-
-$('#multiple-off, #target-off, #date-off').on('ifChanged', function(event){
-    var t = ($('#target-off').prop('checked') ? 0 : 1) != targetInitial;
-    var m = ($('#multiple-off').prop('checked') ? 0 : 1) != multipleInitial;
-    var d = ($('#date-off').prop('checked') ? 0 : 1) != dateInitial;
-
-    enableApplyBtn(t || m || d);
-});
+// $('#multiple-off, #target-off, #date-off').on('ifChanged', function(event){
+//     var t = ($('#target-off').prop('checked') ? 0 : 1) != targetInitial;
+//     var m = ($('#multiple-off').prop('checked') ? 0 : 1) != multipleInitial;
+//     var d = ($('#date-off').prop('checked') ? 0 : 1) != dateInitial;
+//
+//     enableApplyBtn(t || m || d);
+// });
 
 
 $('#target-off').on('ifChanged', function(event){
+    console.log("target changed");
     if(($('#target-off').prop('checked'))){
-        $('#target-number').hide();
+        disable($('#target-number'), true);
+        // $('#target-number').hide();
     }else{
-        $('#target-number').show();
+        disable($('#target-number'), false);
+        // $('#target-number').show();
     }
 });
 
 $('#date-off').on('ifChanged', function(event){
     if(($('#date-off').prop('checked'))){
-        $('#closing-date-div').hide();
+        disable($('#closing-date'), true);
+        // $('#closing-date-div').hide();
     }else{
-        $('#closing-date-div').show();
+        disable($('#closing-date'), false);
+        // $('#closing-date-div').show();
     }
 });
 
-$('#target-number').change(function () {
-    enableApplyBtn($(this).val() != initialTarget);
-});
-
-$('#closing-date').change(function () {
-    enableApplyBtn($(this).val() != initialDate);
-});
-
-$('#response_message').keyup(function () {
-    enableApplyBtn(true);
-});
+// $('#target-number').change(function () {
+//     enableApplyBtn($(this).val() != initialTarget);
+// });
+//
+// $('#closing-date').change(function () {
+//     enableApplyBtn($(this).val() != initialDate);
+// });
+//
+// $('#response_message').keyup(function () {
+//     enableApplyBtn(true);
+// });
 
 function enableApplyBtn(apply){
     $('#apply-btn').prop('disabled', !apply);

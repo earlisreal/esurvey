@@ -69,7 +69,7 @@ return [
     |
     */
 
-    'from' => ['address' => 'esurvey.earl@gmail.com', 'name' => "eSurvey"],
+    'from' => ['address' => 'no-reply@e-survey.xyz', 'name' => "eSurvey"],
 
     /*
     |--------------------------------------------------------------------------
