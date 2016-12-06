@@ -10,11 +10,17 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Route;
 use Jenssegers\Agent\Agent;
 use Log;
 
 class ResponseController extends Controller
 {
+
+    function __construct()
+    {
+        $this->middleware('answer:'.Route::current()->getParameter('id'));
+    }
 
     public function index()
     {
@@ -25,52 +31,56 @@ class ResponseController extends Controller
     {
 
         $survey = Survey::find($id);
-        if(session('thankyou')){
+        if (session('thankyou')) {
             return view('misc.close-message', [
                 'message' => session('thankyou')
             ]);
         }
-        else{
-            if($survey->published){
-                if($survey->option->open){
-                    if(empty($survey->option->target_responses ) || $survey->option->target_responses > $survey->responses->count()){
-                        $dt = Carbon::now();
-                        $dt->hour = 0;
-                        $dt->minute = 0;
-                        $dt->second = 0;
+        if ($survey->option->register_required) {
+            $this->middleware('auth');
+//            return 'register first';
+//            if (Auth::guest())
+                $this->middleware('auth');
+        }
+        if ($survey->published) {
+            if ($survey->option->open) {
+                if (empty($survey->option->target_responses) || $survey->option->target_responses > $survey->responses->count()) {
+                    $dt = Carbon::now();
+                    $dt->hour = 0;
+                    $dt->minute = 0;
+                    $dt->second = 0;
 
-                        if(empty($survey->option->date_close) || $dt->diffInDays(Carbon::parse($survey->option->date_close)) > 0){
-                            $agent = new Agent();
-                            if(!$survey->option->multiple_responses && $survey->responses->where('source_ip',$request->ip())->count() > 0){
-                                return view('misc.close-message', [
-                                    'message' => "You already Answered this Survey. Thank you!"
-                                ]);
-                            }else{
-                                return view('survey.answer', [
-                                    'survey' => $survey,
-                                ]);
-                            }
-                        }else{
+                    if (empty($survey->option->date_close) || $dt->diffInDays(Carbon::parse($survey->option->date_close)) > 0) {
+                        $agent = new Agent();
+                        if (!$survey->option->multiple_responses && $survey->responses->where('source_ip', $request->ip())->count() > 0) {
                             return view('misc.close-message', [
-                                'message' => "The Survey is now Closed. Thank you for paying your time."
+                                'message' => "You already Answered this Survey. Thank you!"
+                            ]);
+                        } else {
+                            return view('survey.answer', [
+                                'survey' => $survey,
                             ]);
                         }
-                    }else{
+                    } else {
                         return view('misc.close-message', [
-                            'message' => "The Survey Has Reach its Target Responses. Thank you for paying your time."
+                            'message' => "The Survey is now Closed. Thank you for paying your time."
                         ]);
                     }
-                }else{ //close
+                } else {
                     return view('misc.close-message', [
-                        'message' => $survey->option->closed_message
+                        'message' => "The Survey Has Reach its Target Responses. Thank you for paying your time."
                     ]);
                 }
+            } else { //close
+                return view('misc.close-message', [
+                    'message' => $survey->option->closed_message
+                ]);
             }
         }
-
     }
 
-    public function store($id, Request $request){
+    public function store($id, Request $request)
+    {
         Log::info($request);
         $survey = Survey::find($id);
         $agent = new Agent();
@@ -83,7 +93,7 @@ class ResponseController extends Controller
 //                    if($question->questionType->type == "Rating Scale"){
 //                        $check['question'.$question->id] = 'required|min:1';
 //                    }else{
-                        $check['question'.$question->id] = 'required|min:1';
+                    $check['question' . $question->id] = 'required|min:1';
 //                    }
                 }
             }
@@ -99,13 +109,13 @@ class ResponseController extends Controller
             $response->source_ip = $request->ip();
             $response->save();
 
-            foreach ($survey->pages as $page){
-                foreach ($page->questions as $question){
-                    switch ($question->questionType->type){
+            foreach ($survey->pages as $page) {
+                foreach ($page->questions as $question) {
+                    switch ($question->questionType->type) {
                         case "Checkbox":
-                            if(count($request->input('question'.$question->id) ) > 0){
-                                foreach ($request->input('question'.$question->id) as $item){
-                                    Log::info("selected -> " .$item);
+                            if (count($request->input('question' . $question->id)) > 0) {
+                                foreach ($request->input('question' . $question->id) as $item) {
+                                    Log::info("selected -> " . $item);
                                     $detail = new ResponseDetail();
                                     $detail->response()->associate($response);
                                     $detail->question()->associate($question);
@@ -119,10 +129,10 @@ class ResponseController extends Controller
                             $detail->response()->associate($response);
                             $detail->question()->associate($question);
 
-                            if($question->questionType->has_choices){
-                                $detail->choice()->associate($request->input('question'.$question->id));
-                            }else{
-                                $detail->text_answer = $request->input('question'.$question->id);
+                            if ($question->questionType->has_choices) {
+                                $detail->choice()->associate($request->input('question' . $question->id));
+                            } else {
+                                $detail->text_answer = $request->input('question' . $question->id);
                             }
 
                             $detail->save();
@@ -136,7 +146,7 @@ class ResponseController extends Controller
 //            'test' => $test,
 //        ]);
 
-        return redirect('answer/'.$id)->with('thankyou', $survey->option->response_message);
+        return redirect('answer/' . $id)->with('thankyou', $survey->option->response_message);
     }
 
 }

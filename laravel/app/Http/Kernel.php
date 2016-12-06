@@ -52,5 +52,6 @@ class Kernel extends HttpKernel
         'admin' => \App\Http\Middleware\AdminMiddleware::class,
         'read' => \App\Http\Middleware\ReadMiddleware::class,
         'verify' => \App\Http\Middleware\VerifyIfActivated::class,
+        'answer' => \App\Http\Middleware\AnswerSurvey::class,
     ];
 }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\User;
 use Carbon\Carbon;
+use Illuminate\Contracts\Logging\Log;
 use Illuminate\Support\Facades\Mail;
 use Validator;
 use App\Http\Controllers\Controller;
@@ -47,7 +48,7 @@ class AuthController extends Controller
     /**
      * Get a validator for an incoming registration request.
      *
-     * @param  array  $data
+     * @param  array $data
      * @return \Illuminate\Contracts\Validation\Validator
      */
     protected function validator(array $data)
@@ -69,13 +70,13 @@ class AuthController extends Controller
     /**
      * Create a new user instance after a valid registration.
      *
-     * @param  array  $data
+     * @param  array $data
      * @return User
      */
     protected function create(array $data)
     {
         $activationCode = str_random(50);
-        $user =  User::create([
+        $user = User::create([
             'username' => $data['username'],
             'last_name' => $data['last_name'],
             'first_name' => $data['first_name'],
@@ -89,15 +90,19 @@ class AuthController extends Controller
             'birthday' => Carbon::parse($data['birthday'])->toDateString(),
             'activation_code' => $activationCode,
         ]);
-        Mail::send('emails.activation',
-            [
-                'code' => $activationCode,
-                'id' => $user->id,
-                'name' => $user->first_name .' ' .$user->last_name
-            ], function($message) use ($user){
-                $message->subject('eSurvey Verification');
-                $message->to($user->email);
-            });
+        try {
+            Mail::send('emails.activation',
+                [
+                    'code' => $activationCode,
+                    'id' => $user->id,
+                    'name' => $user->first_name . ' ' . $user->last_name
+                ], function ($message) use ($user) {
+                    $message->subject('eSurvey Verification');
+                    $message->to($user->email);
+                });
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
+        }
         return $user;
     }
 }
