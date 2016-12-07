@@ -17,4 +17,8 @@ class Response extends Model
     public function responseDetails(){
         return $this->hasMany(ResponseDetail::class);
     }
+
+    public function user(){
+        return $this->belongsTo(User::class);
+    }
 }

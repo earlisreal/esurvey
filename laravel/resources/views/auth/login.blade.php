@@ -10,7 +10,6 @@
     <div class="container">
         <div class="content">
             <div class="col-md-8 col-md-offset-2">
-                <h1>Testing</h1>
                 @if(session('warning'))
                     <div class="alert alert-warning">
                         Please Log in to Continue. <a href="{{ url('register') }}">Register here</a> If you don't have

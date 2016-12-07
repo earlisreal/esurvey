@@ -3,7 +3,13 @@ $(function () {
     // console.log('earl is real');
     filterDate();
     $('.datatable').dataTable({
-        order: []
+        order: [],
+        paging: false,
+        searching: false,
+        // "lengthChange": false,
+        // "ordering": true,
+        // "info": true,
+        // "autoWidth": false
     });
 });
 

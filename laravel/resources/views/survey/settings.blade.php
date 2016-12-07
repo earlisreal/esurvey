@@ -45,7 +45,7 @@
                 <div class="form-group">
                     <label for="response_message" class="col-xs-4">Message for Response:</label>
                     <div class="radio col-xs-8">
-                        <textarea name="response_message" id="response_message" class="form-control"
+                        <textarea name="response_message" id="response_message" class="form-control" placeholder="Thank you for spending your time with us!"
                                   rows="3">{{ $option->response_message }}</textarea>
                     </div>
                 </div>

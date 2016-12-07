@@ -21,6 +21,11 @@ class CreateResponsesTable extends Migration
                 ->onUpdate('cascade');
             $table->ipAddress('source_ip')->nullable();
             $table->string('source', 20)->nullable(); //mobile, web, kiosk, manual input, etc..
+            $table->integer('user_id')->unsigned()->nullable();
+            $table->foreign('user_id')
+                ->references('id')->on('users')
+                ->onDelete('set null')
+                ->onUpdate('set null');
             $table->timestamps();
         });
     }

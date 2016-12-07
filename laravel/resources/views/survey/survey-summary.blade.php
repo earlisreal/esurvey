@@ -7,10 +7,10 @@ if (!empty($_GET['start']) && !empty($_GET['end'])) {
     $end = $_GET['end'];
 
     $totalResponse = $survey
-            ->responses()
-            ->where('created_at', '>=', $start)
-            ->where('created_at', '<=', $end . ' 23:59:59')
-            ->count();
+        ->responses()
+        ->where('created_at', '>=', $start)
+        ->where('created_at', '<=', $end . ' 23:59:59')
+        ->count();
 //            ->whereBetween('created_at', array($start, $end))->count();
 }
 
@@ -103,18 +103,18 @@ if (!empty($_GET['start']) && !empty($_GET['end'])) {
                                                 $total = 0;
                                                 if ($filtered) {
                                                     $responseNumber = DB::table('surveys')
-                                                            ->join('responses', 'surveys.id', '=', 'responses.survey_id')
-                                                            ->join('response_details', 'responses.id', '=', 'response_details.response_id')
-                                                            ->where('question_id', $question->id)
-                                                            ->where('responses.created_at', '>=', $start)
-                                                            ->where('responses.created_at', '<=', $end . ' 23:59:59')
-                                                            ->count();
+                                                        ->join('responses', 'surveys.id', '=', 'responses.survey_id')
+                                                        ->join('response_details', 'responses.id', '=', 'response_details.response_id')
+                                                        ->where('question_id', $question->id)
+                                                        ->where('responses.created_at', '>=', $start)
+                                                        ->where('responses.created_at', '<=', $end . ' 23:59:59')
+                                                        ->count();
                                                 } else {
                                                     $responseNumber = DB::table('surveys')
-                                                            ->join('responses', 'surveys.id', '=', 'responses.survey_id')
-                                                            ->join('response_details', 'responses.id', '=', 'response_details.response_id')
-                                                            ->where('question_id', $question->id)
-                                                            ->count();
+                                                        ->join('responses', 'surveys.id', '=', 'responses.survey_id')
+                                                        ->join('response_details', 'responses.id', '=', 'response_details.response_id')
+                                                        ->where('question_id', $question->id)
+                                                        ->count();
                                                 }
 
                                                 ?>
@@ -124,8 +124,8 @@ if (!empty($_GET['start']) && !empty($_GET['end'])) {
                                                     <?php
                                                     $max_rate = $question->option->max_rating;
                                                     $average = number_format($responseDetails
-                                                            ->where('question_id', $question->id)->avg('text_answer'),
-                                                            2, '.', ',');
+                                                        ->where('question_id', $question->id)->avg('text_answer'),
+                                                        2, '.', ',');
                                                     $variance = 0;
                                                     ?>
                                                     <thead>
@@ -143,18 +143,18 @@ if (!empty($_GET['start']) && !empty($_GET['end'])) {
                                                                 <?php
                                                                 if ($filtered) {
                                                                     $count = $question
-                                                                            ->responses()
-                                                                            ->where('text_answer', $i)
-                                                                            ->where('created_at', '>=', $start)
-                                                                            ->where('created_at', '<=', $end . ' 23:59:59')
-                                                                            ->groupBy('text_answer')
-                                                                            ->count();
+                                                                        ->responses()
+                                                                        ->where('text_answer', $i)
+                                                                        ->where('created_at', '>=', $start)
+                                                                        ->where('created_at', '<=', $end . ' 23:59:59')
+                                                                        ->groupBy('text_answer')
+                                                                        ->count();
                                                                 } else {
                                                                     $count = $question
-                                                                            ->responses()
-                                                                            ->where('text_answer', $i)
-                                                                            ->groupBy('text_answer')
-                                                                            ->count();
+                                                                        ->responses()
+                                                                        ->where('text_answer', $i)
+                                                                        ->groupBy('text_answer')
+                                                                        ->count();
                                                                 }
                                                                 ?>
                                                                 {{ $count }}
@@ -165,38 +165,43 @@ if (!empty($_GET['start']) && !empty($_GET['end'])) {
                                                         </tr>
                                                         <?php
                                                         $donutItem[] = array(
-                                                                "label" => $i,
-                                                                "data" => $count,
-                                                                "color" => $colors[$colorSelector++]
+                                                            "label" => $i,
+                                                            "data" => $count,
+                                                            "color" => $colors[$colorSelector++]
                                                         );
 
                                                         $variance += $count * pow(($i - $average), 2);
                                                         ?>
                                                     @endfor
 
+
+                                                    </tbody>
+                                                    <tfoot>
                                                     <tr>
                                                         <th>Total</th>
-                                                        <td><b>{{ $responseNumber }}</b></td>
-                                                        <td><b>100%</b></td>
+                                                        <th>{{ $responseNumber }}</th>
+                                                        <th>100%</th>
                                                     </tr>
                                                     <tr>
                                                         <th>Average</th>
-                                                        <td>
+                                                        <th colspan="2">
                                                             <b>
                                                                 {{ $average }}
                                                             </b>
-                                                        </td>
+                                                        </th>
                                                         {{--<td><b>{{ $total/$responseNumber/$max_rate*100 }}%</b></td>--}}
                                                     </tr>
-                                                    <td colspan="3">
-                                                        Standard Deviation of
-                                                        <b>{{ number_format(sqrt($variance/($responseNumber)), 2, '.', ',') }}</b>
-                                                        - A standard deviation of small value means that the values, in
-                                                        a distribution are scattered or spread out near the mean and
-                                                        vice versa.
-                                                    </td>
+                                                    <tr>
+                                                        <td colspan="3">
+                                                            Standard Deviation of
+                                                            <b>{{ number_format(sqrt($variance/($responseNumber)), 2, '.', ',') }}</b>
+                                                            - A standard deviation of small value means that the values,
+                                                            in
+                                                            a distribution are scattered or spread out near the mean and
+                                                            vice versa.
+                                                        </td>
                                                     </tr>
-                                                    </tbody>
+                                                    </tfoot>
                                                 @else
                                                     <thead>
                                                     <tr>
@@ -213,22 +218,22 @@ if (!empty($_GET['start']) && !empty($_GET['end'])) {
                                                                 <?php
                                                                 if ($filtered) {
                                                                     $count = DB::table('surveys')
-                                                                            ->join('responses', 'surveys.id', '=', 'responses.survey_id')
-                                                                            ->join('response_details', 'responses.id', '=', 'response_details.response_id')
-                                                                            ->where('question_id', $question->id)
-                                                                            ->where('choice_id', $choice->id)
-                                                                            ->where('responses.created_at', '>=', $start)
-                                                                            ->where('responses.created_at', '<=', $end . ' 23:59:59')
-                                                                            ->groupBy('choice_id')
-                                                                            ->count();
+                                                                        ->join('responses', 'surveys.id', '=', 'responses.survey_id')
+                                                                        ->join('response_details', 'responses.id', '=', 'response_details.response_id')
+                                                                        ->where('question_id', $question->id)
+                                                                        ->where('choice_id', $choice->id)
+                                                                        ->where('responses.created_at', '>=', $start)
+                                                                        ->where('responses.created_at', '<=', $end . ' 23:59:59')
+                                                                        ->groupBy('choice_id')
+                                                                        ->count();
                                                                 } else {
                                                                     $count = DB::table('surveys')
-                                                                            ->join('responses', 'surveys.id', '=', 'responses.survey_id')
-                                                                            ->join('response_details', 'responses.id', '=', 'response_details.response_id')
-                                                                            ->where('question_id', $question->id)
-                                                                            ->where('choice_id', $choice->id)
-                                                                            ->groupBy('choice_id')
-                                                                            ->count();
+                                                                        ->join('responses', 'surveys.id', '=', 'responses.survey_id')
+                                                                        ->join('response_details', 'responses.id', '=', 'response_details.response_id')
+                                                                        ->where('question_id', $question->id)
+                                                                        ->where('choice_id', $choice->id)
+                                                                        ->groupBy('choice_id')
+                                                                        ->count();
                                                                 }
 
                                                                 echo $count;
@@ -243,19 +248,21 @@ if (!empty($_GET['start']) && !empty($_GET['end'])) {
                                                         {{--INITIALIZE JAVA SCRIPT FOR CHART--}}
                                                         <?php
                                                         $donutItem[] = array(
-                                                                "label" => str_limit($choice->label, 12),
-                                                                "data" => $count,
-                                                                "color" => $colors[$colorSelector++]
+                                                            "label" => str_limit($choice->label, 12),
+                                                            "data" => $count,
+                                                            "color" => $colors[$colorSelector++]
                                                         );
                                                         ?>
                                                     @endforeach
+                                                    </tbody>
+                                                    <tfoot>
+
                                                     <tr>
                                                         <th>Total</th>
-                                                        <td><b>{{ $responseNumber }}</b></td>
-                                                        <td><b>100%</b></td>
+                                                        <th>{{ $responseNumber }}</th>
+                                                        <th>100%</th>
                                                     </tr>
-                                                    <tr>
-                                                    </tbody>
+                                                    </tfoot>
                                                 @endif
                                                 <?php $donutChart[] = $donutItem; ?>
                                             </table>
@@ -328,9 +335,9 @@ if (!empty($_GET['start']) && !empty($_GET['end'])) {
 
             function labelFormatter(label, series) {
                 return '<div style="font-size:13px; text-align:center; padding:2px; color: #fff; font-weight: 600;">'
-                        + label
-                        + "<br>"
-                        + series.percent.toFixed(2) + "%</div>";
+                    + label
+                    + "<br>"
+                    + series.percent.toFixed(2) + "%</div>";
             }
 
 

@@ -36,12 +36,7 @@ class ResponseController extends Controller
                 'message' => session('thankyou')
             ]);
         }
-        if ($survey->option->register_required) {
-            $this->middleware('auth');
-//            return 'register first';
-//            if (Auth::guest())
-                $this->middleware('auth');
-        }
+
         if ($survey->published) {
             if ($survey->option->open) {
                 if (empty($survey->option->target_responses) || $survey->option->target_responses > $survey->responses->count()) {
@@ -81,7 +76,7 @@ class ResponseController extends Controller
 
     public function store($id, Request $request)
     {
-        Log::info($request);
+//        Log::info($request);
         $survey = Survey::find($id);
         $agent = new Agent();
         $test = array();
@@ -107,6 +102,9 @@ class ResponseController extends Controller
             $response->survey()->associate($survey);
             $response->source = $agent->platform();
             $response->source_ip = $request->ip();
+            if($survey->option->register_required){
+                $response->user()->associate(Auth::user());
+            }
             $response->save();
 
             foreach ($survey->pages as $page) {
@@ -115,7 +113,7 @@ class ResponseController extends Controller
                         case "Checkbox":
                             if (count($request->input('question' . $question->id)) > 0) {
                                 foreach ($request->input('question' . $question->id) as $item) {
-                                    Log::info("selected -> " . $item);
+//                                    Log::info("selected -> " . $item);
                                     $detail = new ResponseDetail();
                                     $detail->response()->associate($response);
                                     $detail->question()->associate($question);
@@ -146,7 +144,7 @@ class ResponseController extends Controller
 //            'test' => $test,
 //        ]);
 
-        return redirect('answer/' . $id)->with('thankyou', $survey->option->response_message);
+        return redirect('answer/' . $id)->with('thankyou', ($survey->option->response_message == null ? "Thank you for spending your time with us!" : $survey->option->response_message));
     }
 
 }
