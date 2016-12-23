@@ -24,12 +24,17 @@ if (!empty($_GET['start']) && !empty($_GET['end'])) {
 
 @section('style')
     <link rel="stylesheet" href="{{ asset('public/css/analyze-summary.css') }}">
+    <style>
+        .legendLabel{
+            font-size: 18px;
+        }
+    </style>
 @endsection
 
 @section('content-header')
     <section class="content-header">
         <h1>
-            {{ $totalResponse }} Analyze {{ $survey->survey_title }}
+            {{ $survey->survey_title }} Statistics
         </h1>
         <ol class="breadcrumb">
             <li><a href="{{ url('/') }}"><i class="fa fa-dashboard"></i> Home</a></li>
@@ -49,7 +54,7 @@ if (!empty($_GET['start']) && !empty($_GET['end'])) {
         <li role="presentation"><a href="{{ url('/analyze/' .$survey->id .'/user') }}" aria-controls="by-user"
                                    role="tab"><i class="fa fa-users"></i> User Responses</a></li>
     </ul>
-    <div class="tab-content">
+    <div class="tab-content" style="margin-top: 10px;">
         <div role="tabpanel" class="tab-pane active">
             <div class="row">
                 <div class="col-xs-12">
@@ -75,6 +80,9 @@ if (!empty($_GET['start']) && !empty($_GET['end'])) {
                             </div>
                         </div>
                     </div>
+                    @if($questionCount < 1)
+                        No Question To Be Analyze
+                    @endif
                     @if($totalResponse > 0)
                         <?php
                         $questionNo = 1;
@@ -136,7 +144,7 @@ if (!empty($_GET['start']) && !empty($_GET['end'])) {
                                                     </tr>
                                                     </thead>
                                                     <tbody>
-                                                    @for($i=3; $i <= $max_rate; $i++)
+                                                    @for($i=1; $i <= $max_rate; $i++)
                                                         <tr>
                                                             <td>{{ $i }}</td>
                                                             <td>
@@ -248,7 +256,8 @@ if (!empty($_GET['start']) && !empty($_GET['end'])) {
                                                         {{--INITIALIZE JAVA SCRIPT FOR CHART--}}
                                                         <?php
                                                         $donutItem[] = array(
-                                                            "label" => str_limit($choice->label, 12),
+//                                                            "label" => str_limit($choice->label, 12),
+                                                            "label" => $choice->label,
                                                             "data" => $count,
                                                             "color" => $colors[$colorSelector++]
                                                         );
@@ -339,7 +348,6 @@ if (!empty($_GET['start']) && !empty($_GET['end'])) {
                     + "<br>"
                     + series.percent.toFixed(2) + "%</div>";
             }
-
 
         </script>
 

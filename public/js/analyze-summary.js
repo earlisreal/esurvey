@@ -6,9 +6,9 @@ $(function () {
         order: [],
         paging: false,
         searching: false,
+        bInfo: false,
         // "lengthChange": false,
         // "ordering": true,
-        // "info": true,
         // "autoWidth": false
     });
 });
