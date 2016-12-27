@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class QuestionChoice extends Model
 {
     protected $fillable = [
-        'label',
+        'label', 'weight',
     ];
 
     protected $touches = ['question'];

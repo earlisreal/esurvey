@@ -85,11 +85,13 @@ class ResponseController extends Controller
         foreach ($survey->pages as $page) {
             foreach ($page->questions as $question) {
                 if ($question->is_mandatory) {
-//                    if($question->questionType->type == "Rating Scale"){
-//                        $check['question'.$question->id] = 'required|min:1';
-//                    }else{
+                    if($question->questionType->type == "Likert Scale"){
+                        foreach ($question->rows as $row){
+                            $check['row' . $row->id] = 'required|min:1';
+                        }
+                        continue;
+                    }
                     $check['question' . $question->id] = 'required|min:1';
-//                    }
                 }
             }
         }
@@ -120,6 +122,20 @@ class ResponseController extends Controller
                                     $detail->choice()->associate($item);
                                     $detail->save();
                                 }
+                            }
+                            break;
+                        case "Likert Scale":
+                            foreach ($question->rows as $row){
+//                                $response->responseDetails()->create([
+//                                    'choice_id' => $request->input('row' .$row->id),
+//                                    'question_id' => $question->id,
+//                                ]);
+                                $detail = new ResponseDetail();
+                                $detail->choice()->associate($request->input('row' .$row->id));
+                                $detail->question()->associate($question);
+                                $detail->response()->associate($response);
+                                $detail->row()->associate($row);
+                                $detail->save();
                             }
                             break;
                         default:

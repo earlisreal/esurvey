@@ -3,7 +3,8 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
                 <h4 class="modal-title" id="myModalLabel">Customize your question</h4>
             </div>
             <div class="modal-body">
@@ -18,7 +19,10 @@
                                         <div class="col-xs-4">
                                             <select id="question-type-select" class="form-control btn btn-default">
                                                 @foreach($question_types as $question_type)
-                                                    <option class="type-option" value="{{ $question_type->id }}" has-choices="{{ $question_type->has_choices }}">{{ $question_type->type }}</option>
+                                                    <option class="type-option" value="{{ $question_type->id }}"
+                                                            has-choices="{{ $question_type->has_choices }}"
+                                                            data-type="{{ $question_type->type }}"
+                                                    >{{ $question_type->type }}</option>
                                                 @endforeach
                                             </select>
                                         </div>
@@ -38,62 +42,136 @@
                                     </div>
 
                                     <div class="form-group">
-                                        <label class="col-xs-1 control-label" for="question-title"><strong id="modal-question-number">Q1:</strong></label>
+                                        <label class="col-xs-1 control-label" for="question-title"><strong
+                                                    id="modal-question-number">Q1:</strong></label>
                                         <div class="col-xs-11">
-                                            <input type="text" id="question-title" name="question-title" placeholder="Enter Question Title" class="form-control" required>
+                                            <input type="text" id="question-title" name="question-title"
+                                                   placeholder="Enter Question Title" class="form-control" required>
                                             {{--<span class="help-block">--}}
                                             {{--<small><strong>error here</strong></small>--}}
                                             {{--</span>--}}
                                         </div>
-
                                     </div>
-
-
 
                                     <div class="form-group">
                                         <div class="col-xs-12">
                                             <label for="mandatory" class="editable">
-                                                <input id="question-mandatory" type="checkbox" name="mandatory" value="1"> Mandatory Question
+                                                <input id="question-mandatory" type="checkbox" name="mandatory"
+                                                       value="1"> Mandatory Question
                                             </label>
                                         </div>
                                     </div>
 
+                                    <div id="row-container">
+                                        <hr>
 
+                                        <table id="modal-rows-table" class="choices-table">
+                                            <thead>
+                                            <tr>
+                                                <th width="100%">
+                                                    Question Rows
+                                                </th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            <tr class="modal-question-row">
+                                                <td>
+                                                    <input type="text" placeholder="Enter a row label"
+                                                           class="form-control modal-row-label">
+                                                </td>
+                                                <td>
+                                                    <button type="button" tabindex="-1"
+                                                            class="btn btn-primary add-choice"><span
+                                                                class="glyphicon glyphicon-plus"></span></button>
+                                                </td>
+                                                <td>
+                                                    <button type="button" tabindex="-1"
+                                                            class="btn btn-danger remove-choice"><span
+                                                                class="glyphicon glyphicon-remove"></span></button>
+                                                </td>
+                                            </tr>
+
+                                            <tr class="modal-question-row">
+                                                <td>
+                                                    <input id="last-choice-row" type="text"
+                                                           placeholder="Enter a row label"
+                                                           class="form-control modal-row-label">
+                                                </td>
+                                                <td>
+                                                    <button type="button" tabindex="-1"
+                                                            class="btn btn-primary add-choice"><span
+                                                                class="glyphicon glyphicon-plus"></span></button>
+                                                </td>
+                                                <td>
+                                                    <button type="button" tabindex="-1"
+                                                            class="btn btn-danger remove-choice"><span
+                                                                class="glyphicon glyphicon-remove"></span></button>
+                                                </td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
                                     <div id="choice-container" class="collapse">
                                         <hr>
-                                        <strong>Answer Choices</strong>
-
                                         <table id="modal-choices-table" class="choices-table">
+                                            <thead>
+                                            <tr>
+                                                <th colspan="2">
+                                                    Answer Choices
+                                                </th>
 
+                                                <th class="weight-field collapse">
+                                                    Weight
+                                                </th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
                                             <tr class="modal-choice-row">
                                                 <td class="question-type">
                                                     <input type="radio" disabled>
                                                 </td>
                                                 <td width="100%">
-                                                    <input type="text" placeholder="Enter Choice Label" class="form-control modal-choice-label">
+                                                    <input type="text" placeholder="Enter Choice Label"
+                                                           class="form-control modal-choice-label">
+                                                </td>
+                                                <td class="weight-field collapse" style="min-width: 50px;">
+                                                    <input type="text" maxlength="2" class="form-control text-center weight" value="1">
                                                 </td>
                                                 <td>
-                                                    <button type="button" tabindex="-1" class="btn btn-primary add-choice"><span class="glyphicon glyphicon-plus"></span></button>
+                                                    <button type="button" tabindex="-1"
+                                                            class="btn btn-primary add-choice"><span
+                                                                class="glyphicon glyphicon-plus"></span></button>
                                                 </td>
                                                 <td>
-                                                    <button type="button" tabindex="-1" class="btn btn-danger remove-choice"><span class="glyphicon glyphicon-remove"></span></button>
+                                                    <button type="button" tabindex="-1"
+                                                            class="btn btn-danger remove-choice"><span
+                                                                class="glyphicon glyphicon-remove"></span></button>
                                                 </td>
                                             </tr>
-
                                             <tr class="modal-choice-row">
                                                 <td class="question-type">
                                                     <input type="radio" disabled>
                                                 </td>
                                                 <td width="100%">
-                                                    <input id="last-choice-row" type="text" placeholder="Enter Choice Label" class="form-control modal-choice-label">
+                                                    <input type="text" placeholder="Enter Choice Label"
+                                                           class="form-control modal-choice-label">
+                                                </td>
+                                                <td class="weight-field collapse" style="min-width: 50px;">
+                                                    <input type="text" maxlength="2" class="form-control text-center weight" value="2">
                                                 </td>
                                                 <td>
-                                                    <button type="button" tabindex="-1" class="btn btn-primary add-choice"><span class="glyphicon glyphicon-plus"></span></button>
+                                                    <button type="button" tabindex="-1"
+                                                            class="btn btn-primary add-choice"><span
+                                                                class="glyphicon glyphicon-plus"></span></button>
                                                 </td>
                                                 <td>
-                                                    <button type="button" tabindex="-1" class="btn btn-danger remove-choice"><span class="glyphicon glyphicon-remove"></span></button>
+                                                    <button type="button" tabindex="-1"
+                                                            class="btn btn-danger remove-choice"><span
+                                                                class="glyphicon glyphicon-remove"></span></button>
                                                 </td>
                                             </tr>
+                                            </tbody>
+
 
                                         </table>
 
@@ -102,18 +180,18 @@
                                 </form>
                             </div>
                             {{--<ul class="nav nav-tabs" role="tablist">--}}
-                                {{--<li role="presentation" class="active"><a href="#question" aria-controls="question" role="tab" data-toggle="tab">Question</a></li>--}}
-                                {{--<li role="presentation"><a href="#settings" aria-controls="settings" role="tab" data-toggle="tab">Settings</a></li>--}}
+                            {{--<li role="presentation" class="active"><a href="#question" aria-controls="question" role="tab" data-toggle="tab">Question</a></li>--}}
+                            {{--<li role="presentation"><a href="#settings" aria-controls="settings" role="tab" data-toggle="tab">Settings</a></li>--}}
                             {{--</ul>--}}
                             {{--<div class="tab-content panel-body">--}}
 
-                                {{--<div role="tabpanel" class="tab-pane active" id="question">--}}
+                            {{--<div role="tabpanel" class="tab-pane active" id="question">--}}
 
-                                {{--</div>--}}
+                            {{--</div>--}}
 
-                                {{--<div role="tabpanel" class="tab-pane" id="settings">--}}
+                            {{--<div role="tabpanel" class="tab-pane" id="settings">--}}
 
-                                {{--</div>--}}
+                            {{--</div>--}}
 
                             {{--</div>--}}
 

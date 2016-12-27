@@ -149,15 +149,15 @@
                     <!-- sidebar menu: : style can be found in sidebar.less -->
                     <ul class="sidebar-menu">
                         <li class="header">SURVEY NAVIGATION</li>
-                        <li><a href="{{ url('survey/'.$survey->id) }}"><i class="fa fa-dashboard"></i> Dashboard</a></li>
+                        <li class="{{ Request::is('survey/'.$survey->id) ? 'active' : '' }}"><a href="{{ url('survey/'.$survey->id) }}"><i class="fa fa-dashboard"></i> Dashboard</a></li>
                         @if($survey->published)
                         <li><a href=""><i class="fa fa-eye"></i> Preview</a></li>
                         @else
-                            <li><a href="{{ url('create/'.$survey->id) }}"><i class="fa fa-edit"></i> Edit</a></li>
+                            <li class="{{ Request::is('create/'.$survey->id) ? 'active' : '' }}"><a href="{{ url('create/'.$survey->id) }}"><i class="fa fa-edit"></i> Edit</a></li>
                             @endif
-                        <li><a href="{{ url('share/'.$survey->id) }}"><i class="fa fa-share-alt"></i> Share</a></li>
-                        <li><a href="{{ url('settings/'.$survey->id) }}"><i class="fa fa-wrench"></i> Settings</a></li>
-                        <li class="treeview">
+                        <li class="{{ Request::is('share/'.$survey->id) ? 'active' : '' }}"><a href="{{ url('share/'.$survey->id) }}"><i class="fa fa-share-alt"></i> Share</a></li>
+                        <li class="{{ Request::is('settings/'.$survey->id) ? 'active' : '' }}"><a href="{{ url('settings/'.$survey->id) }}"><i class="fa fa-wrench"></i> Settings</a></li>
+                        <li class="treeview {{ Request::is('analyze/'.$survey->id.'/summary') || Request::is('analyze/'.$survey->id.'/user') ? 'active' : '' }}">
                             <a href="">
                                 <i class="fa fa-line-chart"></i>
                                 <span>Analyze</span>
@@ -166,8 +166,8 @@
                         </span>
                             </a>
                             <ul class="treeview-menu">
-                                <li><a href="{{ url('analyze/'.$survey->id) }}"><i class="fa fa-pie-chart"></i> Summary</a></li>
-                                <li><a href="{{ url('analyze/'.$survey->id.'/user') }}"><i class="fa fa-users"></i> Individual Responses</a></li>
+                                <li class="{{ Request::is('analyze/'.$survey->id.'/summary') ? 'active' : '' }}"><a href="{{ url('analyze/'.$survey->id) }}"><i class="fa fa-pie-chart"></i> Summary</a></li>
+                                <li  class="{{ Request::is('analyze/'.$survey->id.'/user') ? 'active' : '' }}"><a href="{{ url('analyze/'.$survey->id.'/user') }}"><i class="fa fa-users"></i> Individual Responses</a></li>
                             </ul>
                         </li>
                         <li><a href="{{ url('analyze/'.$survey->id.'/result.pdf') }}" target="_blank"><i class="fa fa-file-pdf-o"></i> Quick Report</a></li>
@@ -190,11 +190,9 @@
 
                     @yield('content-header')
 
-					<!--
                     <div id="page-loader" class="text-center">
                         <i id="loading-spinner" class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
-                    </div> 
-					-->
+                    </div>
 
                     <div id="page-content" class="content">
                         @yield('content')
@@ -258,6 +256,9 @@
 
 
 @yield('scripts')
+
+
+<script src="{{ asset('public/js/loader.js') }}"></script>
 
 
 <meta name="csrf-token" content="{{ csrf_token() }}">

@@ -50,7 +50,7 @@ class QuestionTypesTableSeeder extends Seeder
 
         DB::table('question_types')->insert([
             'type' => 'Likert Scale',
-            'has_choices' => false,
+            'has_choices' => true,
             'created_at' => Carbon::now(),
         ]);
     }

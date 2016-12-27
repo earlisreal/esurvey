@@ -1,8 +1,12 @@
+//TODO reset fields when close,save or question type changed
+
+
 var questionRowIsClicked = false;
 var selectedChoiceType;
 var choiceCount = 2;
 
 $(function () {
+    console.log("test rearl");
     //!!IMPORTANT
     updateQuestionNumbers();
     $(".question-row-container").each(function(){
@@ -119,6 +123,7 @@ function addChoiceRow(context, focus){
 //SAVING QUESTION
 function saveQuestion(){
     $('#save-question').click(function(){
+        console.log("eaetl test");
         var saveButton = $(this);
         var hasError = false;
 
@@ -126,14 +131,31 @@ function saveQuestion(){
         manipulationMethod = $(this).attr('method');
         questionID = $(this).data('question-id');
 
+        rows = [];
+        if(selectedChoiceType.data('type')=='Likert Scale'){
+            console.log('Likert Scale');
+            $.each($('.modal-row-label'), function () {
+                label = $.trim($(this).val());
+                rows.push(label);
+            });
+        }
+        // console.log(rows);
+
+        //TODO likert scale validation(check rows if empty)
         choices = [];
         if(selectedChoiceType.attr('has-choices')==1){
-            $.each($('.modal-choice-label'), function () {
-                label = $.trim($(this).val());
+            $.each($('.modal-choice-row'), function () {
+                label = $.trim($(this).find('.modal-choice-label').val());
+                weight = $.trim($(this).find('.weight').val());
                 if(label != ""){
-                    choices.push(label);
+                    choices.push({
+                        label: label,
+                        weight: weight
+                    });
                 }
             });
+
+            console.log(choices);
 
             if(choices.length < 2){
                 $('.modal-choice-label').each(function (i, val) {
@@ -167,7 +189,8 @@ function saveQuestion(){
                 is_mandatory: $('#question-mandatory').prop('checked') ? 1 : 0,
                 max_rating: $('#max-rating').val(),
                 page_id: pageId,
-                choices: choices
+                choices: choices,
+                rows: rows
             },
             success: function (data) {
                 disable(saveButton, false);
@@ -475,11 +498,22 @@ function toggleAnswerChoices() {
         $('#choice-container').hide();
         // $('#choice-container').collapse('hide');
     }
-    // console.log(selectedChoiceType.text());
+    console.log(selectedChoiceType.text());
+    $('.weight-field').hide();
+    $('#row-container').hide();
+    $('#max-rating-div').hide();
     if(selectedChoiceType.text() == "Rating Scale"){
         $('#max-rating-div').show();
-    }else{
-        $('#max-rating-div').hide();
+    }else if(selectedChoiceType.text() == "Likert Scale"){
+        $('.weight-field').show();
+        $('#row-container').show();
+        for(var i = 0; i < 3; i++){
+            row = $('.modal-choice-row').last();
+            rowCopy = row.clone(true);
+            rowCopy.find('.weight').val(parseInt(row.find('.weight').val())+1);
+            row.after(rowCopy);
+        }
+
     }
 }
 

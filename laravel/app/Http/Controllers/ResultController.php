@@ -14,6 +14,7 @@ use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
 
 use Illuminate\Support\Facades\DB;
 use Log;
+use Gate;
 
 class ResultController extends Controller
 {
@@ -49,7 +50,11 @@ class ResultController extends Controller
     }
 
     public function summary($id){
-        $survey = Survey::find($id);
+        $survey = Survey::findOrFail($id);
+
+        if (Gate::denies('manipulate-survey', $survey)) {
+            abort(404);
+        }
 
         if($survey->published){
             if($survey->responses->count() > 0){
@@ -57,9 +62,14 @@ class ResultController extends Controller
 //            ->where('questionType->hast_choices')
 //            ->orWhere('questionType->type', 'Rating Scale')
 //            ->get();
+                $questionCount = 0;
+                foreach ($survey->pages as $page){
+                    $questionCount += $page->questions->where('questionType.has_choices', 1)->count();
+                }
                 return view('survey.survey-summary', [
                     'survey' => $survey,
                     'responseDetails' => ResponseDetail::all(),
+                    'questionCount' => $questionCount,
                     'colors' => $this->colors
                 ]);
             }else{

@@ -26,6 +26,8 @@ class AuthServiceProvider extends ServiceProvider
     {
         $this->registerPolicies($gate);
 
-        //
+        $gate->define('manipulate-survey', function ($user, $survey){
+            return $user->id == $survey->user_id;
+        });
     }
 }

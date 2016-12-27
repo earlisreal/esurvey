@@ -1,7 +1,7 @@
 <div class="question-row-container">
 
     <div class="question-row-tools editable"  data-toggle="modal" data-target="#add-question-modal">
-        <div class="col-xs-offset-8 col-xs-4">
+        <div class="col-xs-offset-7 col-xs-5">
             <div class="question-actions">
                 <button type="button" data-action="move_question" class="btn btn-facebook move-question"><i class="fa fa-btn fa-cut"></i>Move</button>
                 <button type="button" data-action="copy_question" class="btn btn-primary copy-question"><i class="fa fa-btn fa-copy"></i>Replicate</button>
@@ -11,7 +11,7 @@
     </div>
 
     <div id="question{{ $question->id }}" class="row question-row" data-max-rating="{{ $question->option == null ? 3 : $question->option->max_rating }}" data-question-id="{{ $question->id }}" data-question-type="{{ $question->questionType->id }}" data-is-mandatory="{{ $question->is_mandatory }}" data-has-choices="{{ $question->questionType->has_choices }}">
-        <div class="col-xs-8 height-adjuster">
+        <div class="col-xs-12 height-adjuster">
             <div class="form-group">
                 <label>
                     <h3>
@@ -20,25 +20,25 @@
                         <span class="question-title">{{ $question->question_title }}</span>
                     </h3>
                 </label>
-                @if($question->questionType()->first()->type == "Multiple Choice")
+                @if($type->type == "Multiple Choice")
                     @foreach($question->choices()->get() as $choice)
                         <div class="radio choice-row" data-choice-id="{{ $choice->id }}">
                             <label class="choice-label"><input type="radio"> {{ $choice->label }}</label>
                         </div>
                     @endforeach
-                @elseif($question->questionType()->first()->type == "Dropdown")
+                @elseif($type->type == "Dropdown")
                     <select class="form-control">
                         @foreach($question->choices()->get() as $choice)
                             <option class="choice-row choice-label" data-choice-id="{{ $choice->id }}">{{ $choice->label }}</option>
                         @endforeach
                     </select>
-                @elseif($question->questionType()->first()->type == "Checkbox")
+                @elseif($type->type == "Checkbox")
                     @foreach($question->choices()->get() as $choice)
                         <div class="checkbox choice-row" data-choice-id="{{ $choice->id }}">
                             <label class="choice-label"><input type="checkbox"> {{ $choice->label }}</label>
                         </div>
                     @endforeach
-                @elseif($question->questionType()->first()->type == "Rating Scale")
+                @elseif($type->type == "Rating Scale")
                     <select class="rating-scale">
                         <option value="-1"></option>
                         @for($i=1; $i<=$question->option->max_rating; $i++)
@@ -53,6 +53,24 @@
                     <div class="form-group">
                         <textarea cols="30" rows="2" class="form-control"></textarea>
                     </div>
+                @elseif($type->type == "Likert Scale")
+                    <table class="table">
+                        <tbody>
+                        @foreach($question->rows as $row)
+                            <tr>
+                                <th>{{ $row->label }}</th>
+                                @foreach($question->choices as $choice)
+                                    <td>
+                                        <label class="radio-inline">
+                                            <input type="radio" name="{{ $question->id }}">
+                                            {{ $choice->label }}
+                                        </label>
+                                    </td>
+                                @endforeach
+                            </tr>
+                        @endforeach
+                        </tbody>
+                    </table>
                 @endif
             </div>
         </div>

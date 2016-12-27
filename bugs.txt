@@ -1,0 +1,2 @@
+Moving a Newly added Likert Scale - Right at the backend - wrong position moved by jquery
+//TODO move choices - First, after - no before

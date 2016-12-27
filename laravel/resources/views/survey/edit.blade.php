@@ -147,6 +147,8 @@
                             <div class="question-container">
                                 {{--AJAX WILL APPEND COMPONENTS HERE--}}
                                 @foreach($page->questions()->orderBy('order_no')->get() as $question)
+                                    <?php $type = $question->questionType; ?>
+
                                     <div class="question-row-container">
 
                                         @if(!$survey->published)
@@ -175,10 +177,10 @@
                                              data-max-rating="{{ $question->option == null ? 3 : $question->option->max_rating }}"
                                              data-question-id="{{ $question->id }}"
                                              data-question-number="{{ $questionNo }}"
-                                             data-question-type="{{ $question->questionType->id }}"
+                                             data-question-type="{{ $type->id }}"
                                              data-is-mandatory="{{ $question->is_mandatory }}"
-                                             data-has-choices="{{ $question->questionType->has_choices }}">
-                                            <div class="col-xs-8 height-adjuster">
+                                             data-has-choices="{{ $type->has_choices }}">
+                                            <div class="col-xs-12 height-adjuster">
                                                 <div class="form-group">
                                                     <label>
                                                         <h3>
@@ -188,7 +190,7 @@
                                                         </h3>
                                                     </label>
 
-                                                    @if($question->questionType->type == "Multiple Choice")
+                                                    @if($type->type == "Multiple Choice")
                                                         @foreach($question->choices()->get() as $choice)
                                                             <div class="radio choice-row"
                                                                  data-choice-id="{{ $choice->id }}">
@@ -197,14 +199,14 @@
                                                                 </label>
                                                             </div>
                                                         @endforeach
-                                                    @elseif($question->questionType()->first()->type == "Dropdown")
+                                                    @elseif($type->type == "Dropdown")
                                                         <select class="form-control">
                                                             @foreach($question->choices()->get() as $choice)
                                                                 <option class="choice-row choice-label"
                                                                         data-choice-id="{{ $choice->id }}">{{ $choice->label }}</option>
                                                             @endforeach
                                                         </select>
-                                                    @elseif($question->questionType()->first()->type == "Checkbox")
+                                                    @elseif($type->type == "Checkbox")
                                                         @foreach($question->choices()->get() as $choice)
                                                             <div class="checkbox choice-row"
                                                                  data-choice-id="{{ $choice->id }}">
@@ -213,22 +215,40 @@
                                                                 </label>
                                                             </div>
                                                         @endforeach
-                                                    @elseif($question->questionType()->first()->type == "Rating Scale")
+                                                    @elseif($type->type == "Rating Scale")
                                                         <select class="rating-scale">
                                                             <option value="-1"></option>
                                                             @for($i=1; $i<=$question->option->max_rating; $i++)
                                                                 <option value="{{ $i }}">{{ $i }}</option>
                                                             @endfor
                                                         </select>
-                                                    @elseif($question->questionType->type == "Textbox")
+                                                    @elseif($type->type == "Textbox")
                                                         <div class="form-group">
                                                             <input type="text" class="form-control">
                                                         </div>
-                                                    @elseif($question->questionType->type == "Text Area")
+                                                    @elseif($type->type == "Text Area")
                                                         <div class="form-group">
                                                             <textarea cols="30" rows="2"
                                                                       class="form-control"></textarea>
                                                         </div>
+                                                    @elseif($type->type == "Likert Scale")
+                                                        <table class="table">
+                                                            <tbody>
+                                                            @foreach($question->rows as $row)
+                                                                <tr>
+                                                                    <th>{{ $row->label }}</th>
+                                                                    @foreach($question->choices as $choice)
+                                                                        <td>
+                                                                            <label class="radio-inline">
+                                                                                <input type="radio" name="{{ $question->id }}">
+                                                                                {{ $choice->label }}
+                                                                            </label>
+                                                                        </td>
+                                                                    @endforeach
+                                                                </tr>
+                                                            @endforeach
+                                                            </tbody>
+                                                        </table>
                                                     @endif
 
                                                 </div>
@@ -303,7 +323,6 @@
     <script src="{{ asset('public/js/survey.js') }}"></script>
     <script src="{{ asset('public/js/page-functions.js') }}"></script>
     <script src="{{ asset('public/js/question-functions.js') }}"></script>
-    <script src="{{ asset('public/js/loader.js') }}"></script>
 
 
 @endsection

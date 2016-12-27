@@ -1,0 +1,3 @@
+Page Loader
+loading icon on button then disable when submitting
+Encrypt URl

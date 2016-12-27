@@ -21,4 +21,8 @@ class ResponseDetail extends Model
     public function choice(){
         return $this->belongsTo(QuestionChoice::class);
     }
+
+    public function row(){
+        return $this->belongsTo(QuestionRow::class);
+    }
 }

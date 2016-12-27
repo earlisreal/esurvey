@@ -32,6 +32,10 @@ class Question extends Model
         return $this->hasMany(ResponseDetail::class);
     }
 
+    public function rows(){
+        return $this->hasMany(QuestionRow::class);
+    }
+
 //    public function generateForm(){
 //        $form = '';
 //        switch ($this->questionType()->type){

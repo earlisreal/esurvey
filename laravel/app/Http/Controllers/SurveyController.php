@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Question;
 use App\QuestionChoice;
 use App\QuestionOption;
+use App\QuestionRow;
 use App\QuestionType;
 use App\Repositories\SurveyRepository;
 use App\Response;
@@ -21,6 +22,7 @@ use Illuminate\Support\Facades\DB;
 use App\Repositories\TaskRepository;
 use Illuminate\Support\Facades\View;
 use Log;
+use Gate;
 
 class SurveyController extends Controller
 {
@@ -136,6 +138,7 @@ class SurveyController extends Controller
 
     public function store($id, Request $request) //storing the question
     {
+        Log::info($request);
         $this->validate($request, [
             'question_title' => 'required|max:250',
             'question_type' => 'required',
@@ -169,10 +172,14 @@ class SurveyController extends Controller
                         $option->save();
                     }
                     $this->saveChoices($type, $question, $request->choices);
+                    if($type->type == "Likert Scale"){
+                        $this->saveRows($question, $request->rows);
+                    }
                 });
                 break;
 
             case "edit":
+                //TODO Implement Likert Scale editing
                 $question = Question::find($request->question_id);
                 DB::transaction(function () use ($request, $question, $type) {
                     QuestionChoice::where('question_id', $request->question_id)->delete();
@@ -194,18 +201,33 @@ class SurveyController extends Controller
         }
 
 //        $this->updateSurveyTimestamps($survey);
-        return view('ajax.question', ['question' => $question]);
+        return view('ajax.question', ['question' => $question, 'type' => $question->questionType]);
     }
 
     private function saveChoices($type, $question, $choices)
     {
         if ($type->has_choices) {
-            foreach ($choices as $label) {
-                $choice = new QuestionChoice();
-                $choice->label = $label;
-                $choice->question()->associate($question);
-                $choice->save();
+            foreach ($choices as $choice) {
+                $newchoice = new QuestionChoice();
+                $newchoice->label = $choice['label'];
+                $newchoice->question()->associate($question);
+
+                //Save question rows for Likert Scale
+                if($type->type == "Likert Scale"){
+                    $newchoice->weight = $choice['weight'];
+                }
+                $newchoice->save();
             }
+        }
+    }
+
+    private function saveRows($question, $rows){
+        foreach ($rows as $row){
+            $newRow = new QuestionRow([
+                'label' => $row
+            ]);
+            $newRow->question()->associate($question);
+            $newRow->save();
         }
     }
 
@@ -419,6 +441,11 @@ class SurveyController extends Controller
 
     public function show($id)
     {
+        $survey = Survey::findOrFail($id);
+
+        if (Gate::denies('manipulate-survey', $survey)) {
+            abort(404);
+        }
         $survey = Survey::find($id);
         return view('survey.edit', ['survey' => $survey, 'adminMode' => false]);
     }
@@ -480,7 +507,12 @@ class SurveyController extends Controller
 
     public function summary($id)
     {
-        $survey = Survey::find($id);
+        $survey = Survey::findOrFail($id);
+
+        if (Gate::denies('manipulate-survey', $survey)) {
+            abort(404);
+        }
+
         return view('survey.summary', [
             'survey' => $survey,
             'adminMode' => false,
