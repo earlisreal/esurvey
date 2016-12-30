@@ -14,7 +14,8 @@
         "barryvdh/laravel-snappy": "^0.3.1",
         "intervention/image": "^2.3",
         "h4cc/wkhtmltopdf-i386": "0.12.x",
-        "h4cc/wkhtmltoimage-i386": "0.12.x"
+        "h4cc/wkhtmltoimage-i386": "0.12.x",
+        "guzzlehttp/guzzle": "~6.0"
     },
     "require-dev": {
         "fzaninotto/faker": "~1.4",

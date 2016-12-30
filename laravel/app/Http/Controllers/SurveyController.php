@@ -441,6 +441,7 @@ class SurveyController extends Controller
 
     public function show($id)
     {
+
         $survey = Survey::findOrFail($id);
 
         if (Gate::denies('manipulate-survey', $survey)) {

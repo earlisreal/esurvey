@@ -25,6 +25,7 @@ class CreateResponseDetailsTable extends Migration
                 ->onDelete('cascade')
                 ->onUpdate('cascade');
             $table->text('text_answer')->nullable();
+            $table->string('sentiment')->nullable();
             $table->integer('row_id')->unsigned()->nullable();
             $table->foreign('row_id')
                 ->references('id')->on('question_rows')

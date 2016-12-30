@@ -13,9 +13,11 @@
 
 
 
-Route::get('/test/', function (){
-    return view('test');
-});
+Route::get('test', 'TestController@test');
+
+Route::get('voice', 'TestController@voice');
+
+Route::get('input', 'TestController@input');
 
 Route::get('/', 'HomeController@show');
 

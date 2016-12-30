@@ -7,6 +7,7 @@ use App\Response;
 use App\ResponseDetail;
 use App\Survey;
 use Carbon\Carbon;
+use GuzzleHttp\Client;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -19,7 +20,7 @@ class ResponseController extends Controller
 
     function __construct()
     {
-        $this->middleware('answer:'.Route::current()->getParameter('id'));
+        $this->middleware('answer:' . Route::current()->getParameter('id'));
     }
 
     public function index()
@@ -85,8 +86,8 @@ class ResponseController extends Controller
         foreach ($survey->pages as $page) {
             foreach ($page->questions as $question) {
                 if ($question->is_mandatory) {
-                    if($question->questionType->type == "Likert Scale"){
-                        foreach ($question->rows as $row){
+                    if ($question->questionType->type == "Likert Scale") {
+                        foreach ($question->rows as $row) {
                             $check['row' . $row->id] = 'required|min:1';
                         }
                         continue;
@@ -104,14 +105,15 @@ class ResponseController extends Controller
             $response->survey()->associate($survey);
             $response->source = $agent->platform();
             $response->source_ip = $request->ip();
-            if($survey->option->register_required){
+            if ($survey->option->register_required) {
                 $response->user()->associate(Auth::user());
             }
             $response->save();
 
             foreach ($survey->pages as $page) {
                 foreach ($page->questions as $question) {
-                    switch ($question->questionType->type) {
+                    $type = $question->questionType->type;
+                    switch ($type) {
                         case "Checkbox":
                             if (count($request->input('question' . $question->id)) > 0) {
                                 foreach ($request->input('question' . $question->id) as $item) {
@@ -125,13 +127,13 @@ class ResponseController extends Controller
                             }
                             break;
                         case "Likert Scale":
-                            foreach ($question->rows as $row){
+                            foreach ($question->rows as $row) {
 //                                $response->responseDetails()->create([
 //                                    'choice_id' => $request->input('row' .$row->id),
 //                                    'question_id' => $question->id,
 //                                ]);
                                 $detail = new ResponseDetail();
-                                $detail->choice()->associate($request->input('row' .$row->id));
+                                $detail->choice()->associate($request->input('row' . $row->id));
                                 $detail->question()->associate($question);
                                 $detail->response()->associate($response);
                                 $detail->row()->associate($row);
@@ -146,7 +148,26 @@ class ResponseController extends Controller
                             if ($question->questionType->has_choices) {
                                 $detail->choice()->associate($request->input('question' . $question->id));
                             } else {
-                                $detail->text_answer = $request->input('question' . $question->id);
+                                $text = $request->input('question' . $question->id);
+                                $detail->text_answer = $text;
+
+                                if($type == "Textbox" || $type == "Text Area"){
+                                    $client = new Client();
+
+                                    Log::info("Sentiment Analysis");
+                                    $res = $client->get('https://gateway-a.watsonplatform.net/calls/text/TextGetTextSentiment',
+                                        [
+                                            'query' => [
+                                                'apikey' => config('app.alchemy_key'),
+                                                'text' => $text,
+                                                'outputMode' => 'json'
+                                            ]
+                                        ]);
+//                                    Log::info($res->getBody());
+                                    $analysis = json_decode($res->getBody());
+                                    Log::info("Status -> " .$analysis->status);
+                                    $detail->sentiment = $analysis->docSentiment->type;
+                                }
                             }
 
                             $detail->save();

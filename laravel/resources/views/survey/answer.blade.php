@@ -1,11 +1,10 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="row">
-        <div class="col-lg-offset-2 col-lg-8">
-            @if(session('thankyou'))
-                <h1>{{ session('thankyou') }}</h1>
-            @else
+    <div class="content">
+
+        <div class="row">
+            <div class="col-lg-offset-2 col-lg-8">
                 <h1>{{ $survey->survey_title }}</h1>
                 <?php $questionNo = 1; ?>
                 <form role="form" method="POST" action="{{ url('/answer/'.$survey->id) }}">
@@ -98,7 +97,8 @@
                                                             </div>
                                                         @endforeach
                                                     @elseif($type == "Rating Scale")
-                                                        <select class="rating-scale" name="question{{ $question->id }}">
+                                                        <select class="rating-scale"
+                                                                name="question{{ $question->id }}">
                                                             <option value=""></option>
                                                             @for($i=1; $i<=$question->option->max_rating; $i++)
                                                                 <option value="{{ $i }}">{{ $i }}</option>
@@ -111,7 +111,8 @@
                                                                 {{ $question->is_mandatory ? 'required' : '' }}>
                                                     @elseif($type == "Text Area")
                                                         <textarea name="question{{ $question->id }}"
-                                                                  id="question{{ $question->id }}" cols="30" rows="4"
+                                                                  id="question{{ $question->id }}" cols="30"
+                                                                  rows="4"
                                                                   class="form-control" {{ $question->is_mandatory ? 'required' : '' }}>{{ old('question'.$question->id) }}</textarea>
                                                     @elseif($type == "Likert Scale")
                                                         <table class="table">
@@ -165,7 +166,7 @@
                         </button>
                     </div>
                 </form>
-            @endif
+            </div>
         </div>
     </div>
 @endsection
