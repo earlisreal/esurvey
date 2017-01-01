@@ -171,7 +171,6 @@ class ResultController extends Controller
         }
 
         Log::info($results);
-//return;
         return view('survey.survey-summary', [
             'survey' => $survey,
             'results' => $results,
