@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 
+use Carbon\Carbon;
 use GuzzleHttp\Client;
 use Illuminate\Http\Request;
 
@@ -16,18 +17,8 @@ class TestController extends Controller
 {
     public function test(Request $request)
     {
-        $client = new Client();
-
-        $res = $client->get('https://gateway-a.watsonplatform.net/calls/text/TextGetTextSentiment',
-            [
-                'query' => [
-                    'apikey' => config('alchemy_key'),
-                    'text' => 'earl is good!',
-                    'outputMode' => 'json'
-                ]
-            ]);
-        Log::info($res->getBody());
-        return $res->getBody();
+        if($request->start != null)
+        return Carbon::parse($request->start)->startOfDay();
     }
 
     public function voice(Request $request)

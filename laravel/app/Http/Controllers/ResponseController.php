@@ -149,24 +149,27 @@ class ResponseController extends Controller
                                 $detail->choice()->associate($request->input('question' . $question->id));
                             } else {
                                 $text = $request->input('question' . $question->id);
-                                $detail->text_answer = $text;
 
-                                if($type == "Textbox" || $type == "Text Area"){
-                                    $client = new Client();
+                                if ($text != null) {
+                                    $detail->text_answer = $text;
 
-                                    Log::info("Sentiment Analysis");
-                                    $res = $client->get('https://gateway-a.watsonplatform.net/calls/text/TextGetTextSentiment',
-                                        [
-                                            'query' => [
-                                                'apikey' => config('app.alchemy_key'),
-                                                'text' => $text,
-                                                'outputMode' => 'json'
-                                            ]
-                                        ]);
+                                    if ($type == "Textbox" || $type == "Text Area") {
+                                        $client = new Client();
+
+                                        Log::info("Sentiment Analysis");
+                                        $res = $client->get('https://gateway-a.watsonplatform.net/calls/text/TextGetTextSentiment',
+                                            [
+                                                'query' => [
+                                                    'apikey' => config('app.alchemy_key'),
+                                                    'text' => $text,
+                                                    'outputMode' => 'json'
+                                                ]
+                                            ]);
 //                                    Log::info($res->getBody());
-                                    $analysis = json_decode($res->getBody());
-                                    Log::info("Status -> " .$analysis->status);
-                                    $detail->sentiment = $analysis->docSentiment->type;
+                                        $analysis = json_decode($res->getBody());
+                                        Log::info("Status -> " . $analysis->status);
+                                        $detail->sentiment = $analysis->docSentiment->type;
+                                    }
                                 }
                             }
 
