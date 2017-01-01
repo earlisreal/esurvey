@@ -85,7 +85,9 @@ class ResultController extends Controller
 
         foreach ($survey->pages as $page) {
             foreach ($page->questions as $question) {
-                $responseCount = 0;
+                $total = 0;
+                $respondents = 0;
+                $totalCount = 0;
                 $index = 0;
                 $type = $question->questionType->type;
                 $rows = [];
@@ -93,10 +95,12 @@ class ResultController extends Controller
                 $datas = [];
                 switch ($type) {
                     case "Checkbox":
-                        $responseCount = count(DB::table('response_details')
-                            ->where('question_id', $question->id)
-                            ->groupBy('response_id')
-                            ->get());
+//                        $respondents = count(
+//                            $question->responses()
+//                                ->where('created_at', '>=', $start)
+//                                ->where('created_at', '<=', $end)
+//                                ->groupBy('response_id')
+//                                ->get());
                     case "Multiple Choice":
                         foreach ($question->choices as $choice) {
                             $count = DB::table('response_details')
@@ -106,7 +110,9 @@ class ResultController extends Controller
                                 ->count();
                             $datas[] = array('label' => $choice->label, 'data' => $count, 'color' => $this->colors[$index]);
                             $index++;
-                            $responseCount += $count;
+                            if($type == "Multiple Choice")
+                               $respondents += $count;
+                            $total += $count;
                         }
                         break;
                     case "Textbox":
@@ -114,13 +120,15 @@ class ResultController extends Controller
                         $responses = DB::table('response_details')
                             ->select(DB::raw('sentiment, COUNT(*) as sentiment_count'))
                             ->where('question_id', $question->id)
+                            ->where('text_answer', '<>', 'NULL')
+                            ->where('sentiment', '<>', 'NULL')
                             ->whereBetween('created_at', [$start, $end])
                             ->groupBy('sentiment')
                             ->get();
                         foreach ($responses as $response) {
                             $datas[] = array('label' => $response->sentiment, 'data' => $response->sentiment_count, 'color' => $this->colors[$index++]);
                             $index++;
-                            $responseCount += $response->sentiment_count;
+                            $respondents += $response->sentiment_count;
                         }
                         break;
                     case "Rating Scale":
@@ -134,7 +142,7 @@ class ResultController extends Controller
 
                             $datas[] = array('label' => $i, 'data' => $count, 'color' => $this->colors[$index]);
                             $index++;
-                            $responseCount += $count;
+                            $respondents += $count;
                         }
                         break;
                     case "Likert Scale":
@@ -142,7 +150,6 @@ class ResultController extends Controller
                             $headers[] = $choice->label;
                         }
                         foreach ($question->rows as $row) {
-                            $total = 0;
                             $sum = 0;
                             $cols = [];
                             foreach ($question->choices as $choice) {
@@ -158,15 +165,24 @@ class ResultController extends Controller
                             $count = $question->choices->count();
                             $rows[] = array('label' => $row->label, 'cols' => $cols,
                                 'total' => $total, 'average' => number_format($sum / $count, 2));
-                            $datas[] = array('label' => $row->label, 'data' => number_format($sum / $count, 2), 'color' => $this->colors[$index++]);
-
-                            $responseCount = $total;
+                            $datas[] = array($row->label, number_format($sum / $count, 2));
                         }
                         break;
                 }
-                if ($responseCount == 0) $responseCount = 1;
-                $results[] = array('datas' => $datas, 'questionTitle' => $question->question_title,
-                    'grid' => array('rows' => $rows, 'headers' => $headers), 'type' => $type, 'responseCount' => $responseCount);
+                if ($respondents == 0) $respondents = 1;
+                if($type == "Checkbox" || $type == "Likert Scale" ){
+                    $respondents = count(
+                        $question->responses()
+                            ->where('created_at', '>=', $start)
+                            ->where('created_at', '<=', $end)
+                            ->where('choice_id', '<>', 'NULL')
+                            ->groupBy('response_id')
+                            ->get());
+                }else{
+                    $total = $respondents;
+                }
+                $results[] = array('datas' => $datas, 'questionTitle' => $question->question_title, 'total' => $total,
+                    'grid' => array('rows' => $rows, 'headers' => $headers), 'type' => $type, 'respondents' => $respondents);
             }
         }
 

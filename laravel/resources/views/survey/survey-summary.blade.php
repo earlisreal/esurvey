@@ -62,6 +62,9 @@
                             </div>
                         </div>
                     </div>
+
+                    <h3>Respondents: {{ $totalResponse }} of {{ $totalResponse }}</h3>
+
                     @if($totalResponse > 0)
                         <?php
                         $questionNo = 1;
@@ -73,15 +76,15 @@
                                 </div>
                                 <div class="panel-body">
 
-                                    <div id="donut-holder">
-                                        <div id="donut-chart{{ $questionNo }}" style="height: 300px;"></div>
-                                        <label id="donut-data{{ $questionNo++ }}"
-                                               style="position: relative; bottom: 200px; left: 47.25%;"></label>
-                                    </div>
+
 
                                     @if($result['type'] == "Likert Scale")
                                         <?php $grid = $result['grid'] ?>
-                                        <table class="table">
+                                            <div id="chart{{ $questionNo }}" style="height: 300px;  "></div>
+                                        <table class="table dataable">
+                                            Out of {{ $totalResponse }} responses - {{ $result['respondents'] }}
+                                            answered,
+                                            {{ $totalResponse - $result['respondents'] }} skipped
                                             <thead>
                                             <tr>
                                                 <th></th>
@@ -106,10 +109,15 @@
                                             </tbody>
                                         </table>
                                     @else
+                                        <div id="chart-holder">
+                                            <div id="chart{{ $questionNo }}" style="height: 300px;"></div>
+                                            <label id="chart-data{{ $questionNo }}"
+                                                   style="position: relative; bottom: 200px; left: 47.25%;"></label>
+                                        </div>
                                         <table class="table table-bordered datatable">
-                                            Out of {{ $totalResponse }} responses - {{ $result['responseCount'] }}
+                                            Out of {{ $totalResponse }} responses - {{ $result['respondents'] }}
                                             answered,
-                                            {{ $totalResponse - $result['responseCount'] }} skipped
+                                            {{ $totalResponse - $result['respondents'] }} skipped
 
                                             <thead>
                                             <tr>
@@ -122,7 +130,7 @@
                                                 <tr>
                                                     <td>{{ $data['label'] }}</td>
                                                     <td>{{ $data['data'] }}</td>
-                                                    <td>{{ number_format($data['data'] / $result['responseCount'] * 100, 2, '.', ',') }}
+                                                    <td>{{ number_format($data['data'] / $result['respondents'] * 100, 2, '.', ',') }}
                                                         %
                                                     </td>
                                                 </tr>
@@ -130,7 +138,7 @@
                                             <tfoot>
                                             <tr>
                                                 <th>Total</th>
-                                                <th>{{ $result['responseCount'] }}</th>
+                                                <th>{{ $result['total'] }}</th>
                                                 <th>100%</th>
                                             </tr>
                                             </tfoot>
@@ -138,6 +146,7 @@
                                     @endif
                                 </div>
                             </div>
+                            <?php $questionNo++ ?>
                         @endforeach
                     @else
                         <div class="panel panel-default">
@@ -176,11 +185,20 @@
         var results = <?php echo json_encode($results) ?>;
         for(var i = 1; i <= results.length; i++){
             var data = results[i - 1]['datas'];
-            drawChart('#donut-chart' + i, data);
+            if(results[i-1]['type'] == 'Likert Scale'){
+                console.log("earl is real");
+                var bar_data = {
+                    data: data,
+                    color: "#3c8dbc"
+                };
+                barChart('#chart' + i, [bar_data]);
+            }else{
+                donutChart('#chart' + i, data);
+            }
         }
 
-        function drawChart(context, data) {
-            $.plot("#donut-chart" + i, data, {
+        function donutChart(context, data) {
+            $.plot(context, data, {
                 series: {
                     pie: {
                         innerRadius: 0.5,
@@ -199,6 +217,29 @@
                 },
                 legend: {
                     show: true
+                }
+            });
+        }
+
+        function barChart(context, data){
+            $.plot(context, data, {
+                grid: {
+                    borderWidth: 1,
+                    borderColor: "#f3f3f3",
+                    tickColor: "#f3f3f3"
+                },
+                series: {
+                    bars: {
+                        show: true,
+                        barWidth: 0.5,
+                        align: "center",
+                        horizontal: false
+                    }
+                },
+                xaxis: {
+                    label: "choices",
+                    mode: "categories",
+                    tickLength: 0
                 }
             });
         }

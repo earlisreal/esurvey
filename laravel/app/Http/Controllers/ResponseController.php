@@ -148,9 +148,9 @@ class ResponseController extends Controller
                             if ($question->questionType->has_choices) {
                                 $detail->choice()->associate($request->input('question' . $question->id));
                             } else {
-                                $text = $request->input('question' . $question->id);
+                                $text = trim($request->input('question' . $question->id));
 
-                                if ($text != null) {
+                                if (!empty($text)) {
                                     $detail->text_answer = $text;
 
                                     if ($type == "Textbox" || $type == "Text Area") {
@@ -168,7 +168,9 @@ class ResponseController extends Controller
 //                                    Log::info($res->getBody());
                                         $analysis = json_decode($res->getBody());
                                         Log::info("Status -> " . $analysis->status);
-                                        $detail->sentiment = $analysis->docSentiment->type;
+                                        if($res->getStatusCode() == 200){
+                                            $detail->sentiment = $analysis->docSentiment->type;
+                                        }
                                     }
                                 }
                             }
