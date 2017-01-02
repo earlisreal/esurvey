@@ -20,108 +20,65 @@ class TestController extends Controller
 {
     public function test(Request $request)
     {
-        $filters = array();
-
-
         $start = "";
         $end = "";
-        $filters = array(['field' => 'choice_id', 'value' => 26]);
-
 
         $filters = array(
             'choices' => [27, 26, 28],
             'texts' => array('13' => ['1', '2']),
             'rows' => array('id' => [35, 36]),
-            'user' => array('country' => 'PH', 'gender' => 'Male')
+            'user' => array('country' => ['PH', 'UK'], 'gender' => ['Male'])
         );
 
 
-
         $responses = Survey::find(2)->responses()
-            ->whereHas('responseDetails', function ($query) {
-                //SHORTER WAY - MULTIPLE OR ON SAME QUESTION
-                $query->orWhere('choice_id', 'like', 27);
-                $query->orWhere('choice_id', 'like', 26);
-                $query->orWhere('choice_id', 'like', 28);
+            ->whereHas('responseDetails', function ($query) use ($filters) {
+                foreach ($filters['choices'] as $choice) {
+                    $query->orWhere('choice_id', $choice);
+                }
             })
             //TEXT ANSWER / RATING SCALE
-            ->whereHas('responseDetails', function ($subQuery) {
-                $subQuery->where(function ($query) {
-                    $query->where('question_id', '=', '13');
-                    $query->where(function ($q) {
-                        $q->where('text_answer', '=', '1');
-
-                        $q->orWhere('text_answer', '=', '2');
+            ->whereHas('responseDetails', function ($subQuery) use ($filters) {
+                foreach ($filters['texts'] as $id => $texts) {
+                    $subQuery->where(function ($query) use ($id, $texts) {
+                        $query->where('question_id', $id);
+                        $query->where(function ($q) use ($texts) {
+                            foreach ($texts as $text) {
+                                $q->orWhere('text_answer', $text);
+                            }
+                        });
                     });
-                });
-
-                $subQuery->where(function ($query) {
-                    $query->where('question_id', '=', '11');
-                    $query->where(function ($q) {
-                        $q->where('text_answer', '=', 'holiday');
-                    });
-                });
+                }
             })
             //LIKERT SCALE
-            ->whereHas('responseDetails', function ($query) {
-                $query->where(function ($subQuery) {
-                    $subQuery->where('row_id', 16);
-                    $subQuery->where(function ($q) {
-                        $q->orWhere('choice_id', 35);
-                        $q->orWhere('choice_id', 36);
-
+            ->whereHas('responseDetails', function ($query) use ($filters) {
+                foreach ($filters['rows'] as $id => $choices) {
+                    $query->where(function ($subQuery) use ($id, $choices) {
+                        $subQuery->where('row_id', $id);
+                        $subQuery->where(function ($q) use ($choices) {
+                            foreach ($choices as $choice) {
+                                $q->orWhere('choice_id', $choice);
+                            }
+                        });
                     });
-                });
-
-                $query->where(function ($subQuery) {
-                    $subQuery->where('row_id', 15);
-                    $subQuery->where(function ($q) {
-                        $q->orWhere('choice_id', 35);
-                        $q->orWhere('choice_id', 36);
-
-                    });
-                });
+                }
             })
-            ->where(function ($subQuery) { //FILTER USER INFO
-                $subQuery->whereHas('user', function ($query) {
-                    $query->where('country', '=', 'PH');
-                });
+            ->whereHas('user', function ($subQuery) use ($filters) { //FILTER USER INFO
+                foreach ($filters['user'] as $field => $values) {
+                    $subQuery->where(function ($query) use ($field, $values) {
+                        foreach ($values as $value) {
+                            $query->orWhere($field, $value);
+                        }
+                    });
+                }
             })
             //FILTER DATES
 //            ->where('created_at', '>=', $start)
 //            ->where('created_at', '<=', $end)
             ->when(!empty($start) && !empty($end), function ($query) use ($start, $end) {
-                $query
-                    ->whereBetween('created_at', [$start, $end]);
+                $query->whereBetween('created_at', [$start, $end]);
             })
-            //WHERE Date
-
             ->toSql();
-
-//        $responses = Survey::find(2)->responses()
-//            ->whereHas('responseDetails', function ($query) { //FILTER QUESTIONS
-//                //SHORTER WAY - MULTIPLE OR ON SAME QUESTION
-//                $query->orWhere('choice_id', 'like', 27)
-//                    ->orWhere('choice_id', 'like', 26);
-//            })
-//            ->where(function ($subQuery) {
-//                $subQuery->whereHas('responseDetails', function ($query) {
-//                    $query->where('question_id', '=', '13');
-//                });
-//                $subQuery->whereHas('responseDetails', function ($query) {
-//                    $query->where('text_answer', '=', '1');
-//
-//                    $query->orWhere('text_answer', '=', '2');
-//                });
-//            })
-//            ->where(function ($subQuery){ //FILTER USER INFO
-//                $subQuery->whereHas('user', function ($query){
-//                   $query->where('country', '=', 'PH');
-//                });
-//            })
-//            ->where('created_at', '>=', $start) //FILTER DATES
-//            ->where('created_at', '<=', $end)
-//            ->get();
         return ($responses);
     }
 

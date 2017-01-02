@@ -83,6 +83,8 @@ function showChoices(index) {
                 "</label> </div>";
         }
         $('#question-choices').html(choices);
+
+        
     }
 }
 
