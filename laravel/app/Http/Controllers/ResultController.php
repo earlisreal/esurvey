@@ -69,6 +69,8 @@ class ResultController extends Controller
             ]);
         }
 
+
+
         $start = Carbon::parse($survey->responses->first()->created_at)->startOfDay();
         $end = Carbon::now()->endOfDay();
         if ($request->start != null && $request->end != null) {
@@ -85,9 +87,11 @@ class ResultController extends Controller
 
         foreach ($survey->pages as $page) {
             foreach ($page->questions as $question) {
+                $standardDeviation = 0;
+                $average = 0;
+                $variance = 0;
                 $total = 0;
                 $respondents = 0;
-                $totalCount = 0;
                 $index = 0;
                 $type = $question->questionType->type;
                 $rows = [];
@@ -108,10 +112,10 @@ class ResultController extends Controller
                                 ->where('question_id', $question->id)
                                 ->whereBetween('created_at', [$start, $end])
                                 ->count();
-                            $datas[] = array('label' => $choice->label, 'data' => $count, 'color' => $this->colors[$index]);
+                            $datas[] = array('id' => $choice->id, 'label' => $choice->label, 'data' => $count, 'color' => $this->colors[$index]);
                             $index++;
-                            if($type == "Multiple Choice")
-                               $respondents += $count;
+                            if ($type == "Multiple Choice")
+                                $respondents += $count;
                             $total += $count;
                         }
                         break;
@@ -133,6 +137,7 @@ class ResultController extends Controller
                         break;
                     case "Rating Scale":
                         $maxRate = $question->option->max_rating;
+                        $average = number_format($question->responses()->avg('text_answer'), 2);
                         for ($i = 1; $i <= $maxRate; $i++) {
                             $count = DB::table('response_details')
                                 ->where('question_id', $question->id)
@@ -143,6 +148,7 @@ class ResultController extends Controller
                             $datas[] = array('label' => $i, 'data' => $count, 'color' => $this->colors[$index]);
                             $index++;
                             $respondents += $count;
+                            $variance += $count * pow(($i - $average), 2);
                         }
                         break;
                     case "Likert Scale":
@@ -170,7 +176,7 @@ class ResultController extends Controller
                         break;
                 }
                 if ($respondents == 0) $respondents = 1;
-                if($type == "Checkbox" || $type == "Likert Scale" ){
+                if ($type == "Checkbox" || $type == "Likert Scale") {
                     $respondents = count(
                         $question->responses()
                             ->where('created_at', '>=', $start)
@@ -178,11 +184,19 @@ class ResultController extends Controller
                             ->where('choice_id', '<>', 'NULL')
                             ->groupBy('response_id')
                             ->get());
-                }else{
+                } else {
                     $total = $respondents;
                 }
-                $results[] = array('datas' => $datas, 'questionTitle' => $question->question_title, 'total' => $total,
-                    'grid' => array('rows' => $rows, 'headers' => $headers), 'type' => $type, 'respondents' => $respondents);
+                $results[] = array(
+                    'datas' => $datas,
+                    'questionTitle' => $question->question_title,
+                    'total' => $total,
+                    'grid' => array('rows' => $rows, 'headers' => $headers),
+                    'type' => $type,
+                    'respondents' => $respondents,
+                    'average' => $average,
+                    'standardDeviation' => number_format(sqrt($variance/($respondents)), 2)
+                );
             }
         }
 

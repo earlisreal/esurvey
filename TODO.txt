@@ -4,3 +4,5 @@ Encrypt URl
 
 Start Date picker and End Date picker
 min date = survey->created_at | max = now()
+
+PDF report

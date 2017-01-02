@@ -5,6 +5,8 @@
 @endsection
 
 @section('style')
+    <!-- Date Picker -->
+    <link rel="stylesheet" href="{{ asset('public/plugins/datepicker/datepicker3.css') }}">
     <link rel="stylesheet" href="{{ asset('public/css/analyze-summary.css') }}">
     <style>
         .legendLabel {
@@ -42,15 +44,70 @@
                 <div class="col-xs-12">
                     {{--<h4>Earl is Real</h4>--}}
                     <div class="row">
-                        <div class="form-group col-xs-6">
+                        <div class="form-group col-xs-3">
                             <label for="filter-btn" class="control-label">Filter:</label>
                             <div class="input-group">
-                                <button id="filter-btn" class="btn btn-primary daterange-btn"><span
-                                            class="fa fa-filter"> </span> <span id="current-filter"> None</span>
+                                <button id="filter-btn" class="btn btn-primary"><span
+                                            class="fa fa-plus"> </span> <span id="current-filter"> Filter</span>
                                 </button>
+                                <div class="dropdown-menu filter-dropdown" style="min-width: 200px;">
+                                    <div class="ranges">
+                                        <ul>
+                                            <li data-filter="date">Filter by Date</li>
+                                            <li data-filter="question">Filter by Question Answer</li>
+                                            <li data-filter="user">Filter by User Information</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="dropdown-menu date-filter dropdown-content" style="min-width: 320px;">
+                                    <label for="">Filter Date</label>
+                                    <div class="form-group">
+
+                                        <input type="text" id="start-date" placeholder="Start Date">
+                                        to
+                                        <input type="text" id="end-date" placeholder="End Date">
+                                    </div>
+
+                                    <div class="range_inputs">
+                                        <button class="applyBtn btn btn-sm btn-success" type="button">Apply</button>
+                                        <button class="cancelBtn btn btn-sm btn-default" type="button">Cancel
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="dropdown-menu question-filter dropdown-content" style="min-width: 320px;">
+                                    <label for="">Question answer</label>
+
+                                    <select name="question" id="question-select" class="form-control"
+                                            style="margin-bottom: 10px">
+                                    </select>
+
+                                    <div class="range_inputs">
+                                        <button class="cancelBtn btn btn-sm btn-default" type="button">Cancel
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="dropdown-menu choices-filter dropdown-content" style="min-width: 320px;">
+                                    <label id="question-label">Question Choices</label>
+
+                                    <form action="" id="question-choices">
+
+                                    </form>
+
+                                    <div class="range_inputs">
+                                        <button class="applyBtn btn btn-sm btn-success" type="button">Apply</button>
+                                        <button class="cancelBtn btn btn-sm btn-default" type="button">Cancel
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <div class="form-group col-xs-6">
+                            <h4>DAte</h4>
+                            <h4>Question</h4>
+                        </div>
+                        <div class="form-group col-xs-3">
                             <div class="pull-right">
 
                                 <label for="to-pdf" class="control-label">Download/Print:</label>
@@ -76,11 +133,9 @@
                                 </div>
                                 <div class="panel-body">
 
-
-
                                     @if($result['type'] == "Likert Scale")
                                         <?php $grid = $result['grid'] ?>
-                                            <div id="chart{{ $questionNo }}" style="height: 300px;  "></div>
+                                        <div id="chart{{ $questionNo }}" style="height: 300px;  "></div>
                                         <table class="table dataable">
                                             Out of {{ $totalResponse }} responses - {{ $result['respondents'] }}
                                             answered,
@@ -141,6 +196,18 @@
                                                 <th>{{ $result['total'] }}</th>
                                                 <th>100%</th>
                                             </tr>
+                                            @if($result['type'] == "Rating Scale")
+                                                <tr>
+
+                                                    <td colspan="3">
+                                                        Standard Deviation of
+                                                        <b>{{ $result['standardDeviation'] }}</b>
+                                                        - A standard deviation of small value means that the values, in
+                                                        a distribution are scattered or spread out near the mean and
+                                                        vice versa.
+                                                    </td>
+                                                </tr>
+                                            @endif
                                             </tfoot>
                                         </table>
                                     @endif
@@ -164,6 +231,7 @@
 @endsection
 
 @section('scripts')
+    <script src="{{ asset('public/plugins/datepicker/bootstrap-datepicker.js') }}"></script>
     <!-- FLOT CHARTS -->
     <script src="{{ asset('public/plugins/flot/jquery.flot.min.js') }}"></script>
     <!-- FLOT RESIZE PLUGIN - allows the chart to redraw when the window is resized -->
@@ -173,26 +241,18 @@
     <!-- FLOT CATEGORIES PLUGIN - Used to draw bar charts -->
     <script src="{{ asset('public/plugins/flot/jquery.flot.categories.min.js') }}"></script>
 
-
-
-    <script>
-
-        var minDate = '{{ $survey->responses()->orderBy('created_at')->first()->created_at }}';
-    </script>
-
-
     <script>
         var results = <?php echo json_encode($results) ?>;
-        for(var i = 1; i <= results.length; i++){
+        for (var i = 1; i <= results.length; i++) {
             var data = results[i - 1]['datas'];
-            if(results[i-1]['type'] == 'Likert Scale'){
+            if (results[i - 1]['type'] == 'Likert Scale') {
                 console.log("earl is real");
                 var bar_data = {
                     data: data,
                     color: "#3c8dbc"
                 };
                 barChart('#chart' + i, [bar_data]);
-            }else{
+            } else {
                 donutChart('#chart' + i, data);
             }
         }
@@ -221,7 +281,7 @@
             });
         }
 
-        function barChart(context, data){
+        function barChart(context, data) {
             $.plot(context, data, {
                 grid: {
                     borderWidth: 1,
