@@ -3,7 +3,8 @@ var selectedIndex;
 console.log(responseCount);
 
 $(function () {
-    dateRange();
+    console.log("earl is real");
+    // dateRange();
 
     $('.response-row').click(function () {
         selectedIndex = $(this).index(0);

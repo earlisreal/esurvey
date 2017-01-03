@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
 
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Log;
 use Gate;
@@ -53,6 +54,7 @@ class ResultController extends Controller
 
     public function summary($id, Request $request)
     {
+//        Cache::flush();
         $survey = Survey::findOrFail($id);
 
         if (Gate::denies('manipulate-survey', $survey)) {
@@ -69,21 +71,174 @@ class ResultController extends Controller
             ]);
         }
 
+        $datas = $this->getResults($survey, $request);
 
+        return view('survey.survey-summary', [
+            'survey' => $survey,
+            'results' => $datas['results'],
+            'totalResponse' => $datas['totalResponse'],
+            'responseCount' => $datas['responseCount'],
+            'filters' => $datas['filters']
+        ]);
+    }
 
-        $start = Carbon::parse($survey->responses->first()->created_at)->startOfDay();
-        $end = Carbon::now()->endOfDay();
-        if ($request->start != null && $request->end != null) {
-            $start = Carbon::parse($request->start)->startOfDay();
-            $end = Carbon::parse($request->end)->endOfDay();
+    public function addFilter($id, Request $request)
+    {
+        $survey = Survey::findOrFail($id);
+        $datas = $request->datas;
+        switch ($request->type) {
+            case "date":
+                Cache::forever('date' . $id,
+                    ['start' => $datas['start'], 'end' => $datas['end']]);
+                break;
+            case "question":
+                $questions = [];
+                if (Cache::has('question' . $id)) {
+                    $datas = $request->datas;
+                    $questions = Cache::get('question' . $id);
+                }
+                $questions[$datas['id']] = $datas['values'];
+                Log::info("QUESTION FILTER TEST:");
+
+                Cache::forever('question' . $id, $questions);
+                Log::info(Cache::get('question' . $id));
+                break;
+            case "texts":
+
+                break;
+            case "user":
+
+                break;
         }
 
-        $results = [];
-        $totalResponse = $survey->responses()
-            ->where('created_at', '>=', $start)
-            ->where('created_at', '<=', $end)->count();
+        return view('ajax.analyzeSummary', $this->getResults($survey));
+    }
 
-        Log::info('Total Responses -> ' . $totalResponse);
+    public function removeFilter($id, Request $request){
+        $key = $request->key;
+        if($key == "question"){
+            $questions = Cache::get($key.$id);
+            unset($questions[$request->id]);
+            Cache::forever($key.$id, $questions);
+        }else if($key == "date"){
+            Cache::pull('date'.$id);
+        }else if($key == "all"){
+            Cache::pull('question'.$id);
+            Cache::pull('date'.$id);
+        }
+
+        return view('ajax.analyzeSummary', $this->getResults(Survey::find($id)));
+    }
+
+    private function getFilters($id)
+    {
+        $filters = array(
+            'date' => [],
+            'question' => [],
+            'rows' => array(),
+            'user' => array(),
+        );
+//        if(Cache::has('question'.$id)){
+        $filters['question'] = Cache::get('question' . $id);
+//        }
+
+        Log::info(Cache::get('question' . $id));
+
+        if (Cache::has(['date' . $id])) {
+            $filters['date'] = Cache::get('date' . $id);
+            Log::info($filters['date']);
+        }
+
+        return $filters;
+    }
+
+    private function getResults(Survey $survey)
+    {
+
+
+        /***************************************************************************************************************
+         *                              RESULT MANIPULATION START HERE                                                 *
+         **************************************************************************************************************/
+
+        $filters = $this->getFilters($survey->id);
+
+        Log::info($filters);
+
+        $start = $survey->responses->sortBy('created_at')->first()->created_at;
+        $end = Carbon::parse($survey->responses->sortByDesc('created_at')->first()->created_at)->endOfDay();
+
+        $dates = $filters['date'];
+        if (!empty($dates)) {
+            $start = Carbon::parse($dates['start'])->startOfDay();
+            $end = Carbon::parse($dates['end'])->endOfDay();
+        }
+
+        $responses = $survey->responses()
+            ->select('id')
+            ->where(function ($base) use ($filters, $survey) {
+                if (!empty($filters['question'])) {
+                    $questions = $filters['question'];
+                    if (count($questions) > 0) {
+                        Log::info("QUESTION READ");
+                        Log::info($questions);
+                        $base->whereHas('responseDetails', function ($query) use ($questions) {
+                            foreach ($questions as $id => $values) {
+                                Log::info("ID -> " . $id);
+                                Log::info($values);
+                                $query->where('question_id', $id);
+                                if (Question::find($id)->questionType->type != "Rating Scale") {
+                                    $query->whereIn('choice_id', $values);
+                                } else {
+                                    $query->whereIn('text_answer', $values);
+                                }
+                            }
+                        });
+                    }
+                }
+
+                if (!empty($filters['rows'])) {
+                    //LIKERT SCALE
+                    $base->whereHas('responseDetails', function ($query) use ($filters) {
+                        foreach ($filters['rows'] as $id => $choices) {
+                            $query->where(function ($subQuery) use ($id, $choices) {
+                                $subQuery->where('row_id', $id);
+                                $subQuery->where(function ($q) use ($choices) {
+                                    foreach ($choices as $choice) {
+                                        $q->orWhere('choice_id', $choice);
+                                    }
+                                });
+                            });
+                        }
+                    });
+                }
+
+                if (!empty($filters['user'])) {
+                    $base->whereHas('user', function ($subQuery) use ($filters) { //FILTER USER INFO
+                        foreach ($filters['user'] as $field => $values) {
+                            $subQuery->where(function ($query) use ($field, $values) {
+                                foreach ($values as $value) {
+                                    $query->orWhere($field, $value);
+                                }
+                            });
+                        }
+                    });
+                }
+            })
+            //FILTER DATES
+//            ->where('created_at', '>=', $start)
+//            ->where('created_at', '<=', $end)
+
+            ->whereBetween('created_at', [$start, $end])
+            ->pluck('id');
+
+//        return var_dump($responses);
+//        Log::info($responses);
+
+        $results = [];
+        $responseCount = $survey->responses()->count();
+        $totalResponse = $responses->count();
+
+//        Log::info("COUNT -> " . $totalResponse);
 
         foreach ($survey->pages as $page) {
             foreach ($page->questions as $question) {
@@ -108,9 +263,9 @@ class ResultController extends Controller
                     case "Multiple Choice":
                         foreach ($question->choices as $choice) {
                             $count = DB::table('response_details')
+                                ->whereIn('response_id', $responses)
                                 ->where('choice_id', $choice->id)
                                 ->where('question_id', $question->id)
-                                ->whereBetween('created_at', [$start, $end])
                                 ->count();
                             $datas[] = array('id' => $choice->id, 'label' => $choice->label, 'data' => $count, 'color' => $this->colors[$index]);
                             $index++;
@@ -121,28 +276,32 @@ class ResultController extends Controller
                         break;
                     case "Textbox":
                     case "Text Area":
-                        $responses = DB::table('response_details')
+                        $details = DB::table('response_details')
+                            ->whereIn('response_id', $responses)
                             ->select(DB::raw('sentiment, COUNT(*) as sentiment_count'))
                             ->where('question_id', $question->id)
                             ->where('text_answer', '<>', 'NULL')
                             ->where('sentiment', '<>', 'NULL')
-                            ->whereBetween('created_at', [$start, $end])
                             ->groupBy('sentiment')
                             ->get();
-                        foreach ($responses as $response) {
-                            $datas[] = array('label' => $response->sentiment, 'data' => $response->sentiment_count, 'color' => $this->colors[$index++]);
+                        foreach ($details as $detail) {
+                            $datas[] = array('label' => $detail->sentiment, 'data' => $detail->sentiment_count, 'color' => $this->colors[$index++]);
                             $index++;
-                            $respondents += $response->sentiment_count;
+                            $respondents += $detail->sentiment_count;
                         }
                         break;
                     case "Rating Scale":
                         $maxRate = $question->option->max_rating;
-                        $average = number_format($question->responses()->avg('text_answer'), 2);
+                        $average = number_format(
+                            DB::table('response_details')
+                                ->whereIn('response_id', $responses)
+                                ->where('question_id', $question->id)
+                                ->avg('text_answer'), 2);
                         for ($i = 1; $i <= $maxRate; $i++) {
                             $count = DB::table('response_details')
+                                ->whereIn('response_id', $responses)
                                 ->where('question_id', $question->id)
                                 ->where('text_answer', $i)
-                                ->whereBetween('created_at', [$start, $end])
                                 ->count();
 
                             $datas[] = array('label' => $i, 'data' => $count, 'color' => $this->colors[$index]);
@@ -157,30 +316,31 @@ class ResultController extends Controller
                         }
                         foreach ($question->rows as $row) {
                             $sum = 0;
+                            $total = 0;
                             $cols = [];
                             foreach ($question->choices as $choice) {
                                 $count = DB::table('response_details')
+                                    ->whereIn('response_id', $responses)
                                     ->where('row_id', $row->id)
                                     ->where('choice_id', $choice->id)
-                                    ->whereBetween('created_at', [$start, $end])
                                     ->count();
                                 $cols[] = $count;
                                 $total += $count;
                                 $sum += $count * $choice->weight;
                             }
                             $count = $question->choices->count();
+                            $average = $total > 0 ? number_format($sum / $total, 2) : 0;
                             $rows[] = array('label' => $row->label, 'cols' => $cols,
-                                'total' => $total, 'average' => number_format($sum / $count, 2));
-                            $datas[] = array($row->label, number_format($sum / $count, 2));
+                                'total' => $total, 'average' => $average);
+                            $datas[] = array($row->label, $average);
                         }
                         break;
                 }
-                if ($respondents == 0) $respondents = 1;
                 if ($type == "Checkbox" || $type == "Likert Scale") {
                     $respondents = count(
-                        $question->responses()
-                            ->where('created_at', '>=', $start)
-                            ->where('created_at', '<=', $end)
+                        DB::table('response_details')
+                            ->whereIn('response_id', $responses)
+                            ->where('question_id', $question->id)
                             ->where('choice_id', '<>', 'NULL')
                             ->groupBy('response_id')
                             ->get());
@@ -188,6 +348,7 @@ class ResultController extends Controller
                     $total = $respondents;
                 }
                 $results[] = array(
+                    'id' => $question->id,
                     'datas' => $datas,
                     'questionTitle' => $question->question_title,
                     'total' => $total,
@@ -195,17 +356,19 @@ class ResultController extends Controller
                     'type' => $type,
                     'respondents' => $respondents,
                     'average' => $average,
-                    'standardDeviation' => number_format(sqrt($variance/($respondents)), 2)
+                    'standardDeviation' => $total > 0 ? number_format(sqrt($variance / ($total)), 2) : 0
                 );
             }
         }
 
-        Log::info($results);
-        return view('survey.survey-summary', [
-            'survey' => $survey,
+//        Log::info($results);
+
+        return array(
+            'filters' => $filters,
             'results' => $results,
-            'totalResponse' => $totalResponse
-        ]);
+            'totalResponse' => $totalResponse,
+            'responseCount' => $responseCount
+        );
     }
 
     public function user($id)
@@ -217,6 +380,7 @@ class ResultController extends Controller
 
     public function getDetails(Request $request, $id)
     {
+//        Log::info("ID -> " .$request->response_id);
         return view('modals.userResponse', [
             'response' => Response::find($request->response_id)
         ]);

@@ -104,6 +104,10 @@ Route::get('/analyze/{id}/result.pdf', 'ResultController@generatePdf');
 
 Route::post('/analyze/{id}/user', 'ResultController@getDetails');
 
+Route::post('/analyze/{id}/summary', 'ResultController@addFilter');
+
+Route::delete('/analyze/{id}/summary', 'ResultController@removeFilter');
+
 /*************************************************************************************************************
  *                                          OTHER                                                            *
  *************************************************************************************************************/

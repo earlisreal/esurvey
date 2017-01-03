@@ -1,5 +1,7 @@
 $(function () {
-    filter();
+    initializeCharts();
+    initializeRemoveFilter();
+    setupFilter();
     // filterDate();
     $('.datatable').dataTable({
         order: [],
@@ -12,9 +14,13 @@ $(function () {
     });
 });
 
-function filter() {
+var hidden = true;
+
+function setupFilter() {
     $('#filter-btn').click(function () {
-        $('.filter-dropdown').show();
+        if (hidden) $('.filter-dropdown').show();
+        else $('.filter-dropdown').hide();
+        hidden = !hidden;
     });
 
     $('.filter-dropdown > .ranges > ul > li').click(function () {
@@ -37,14 +43,17 @@ function filter() {
     });
 
     $('.cancelBtn').click(function () {
-        $(this).closest('.dropdown-menu').hide();
+        hideDropdown();
     });
 
     $('.date-filter > .range_inputs .applyBtn').click(function () {
-        var start = moment($('#start-date').val());
-        var end = moment($('#end-date').val());
-        window.location.replace(window.location.pathname + '?start=' + start.format('YYYY-MM-DD') + '&end=' + end.format('YYYY-MM-DD'));
-        $('.date-filter').hide();
+        var start = $('#start-date').val();
+        var end = $('#end-date').val();
+
+        filter('date', {start: start, end: end});
+
+        // window.location.replace(window.location.pathname + '?start=' + start.format('YYYY-MM-DD') + '&end=' + end.format('YYYY-MM-DD'));
+        hideDropdown();
     });
 }
 
@@ -66,28 +75,97 @@ function showQuestions() {
     });
 }
 
-function showChoices(index) {
-    console.log("index -> " +index);
-    var question = results[index];
-    console.log(question);
-    $('#question-label').html("Q" +(parseInt(index) + 1) +": " +question['questionTitle']);
-    if (question['type'] == "Multiple Choice") {
-        $('.question-filter').hide();
-        $('.choices-filter').show();
-        var choices = "";
-        var datas = question['datas'];
-        for(var i = 0; i < datas.length; i++){
-            choices += "<div class='checkbox'> " +
-                "<label><input type='checkbox' value='" +datas[i]['id'] +"'>" +
-                datas[i]['label'] +
-                "</label> </div>";
+function filter(type, datas) {
+    $.ajax({
+        type: 'POST',
+        data: {
+            type: type,
+            datas: datas
+        },
+        beforeSend: function () {
+            console.log("sending...");
+            $('#page-loader').show();
+        },
+        success: function (data) {
+            $('#results').html(data);
+        },
+        error: function (data) {
+            console.log(data);
+            errorToast();
+        },
+        complete: function () {
+            initializeRemoveFilter();
+            initializeCharts();
+            console.log("complete!");
+            $('#page-loader').hide();
         }
-        $('#question-choices').html(choices);
-
-        
-    }
+    });
 }
 
+function showChoices(index) {
+    console.log("index -> " + index);
+    var question = results[index];
+    console.log(question);
+    $('#question-label').html("Q" + (parseInt(index) + 1) + ": " + question['questionTitle']);
+    $('.question-filter').hide();
+    $('.choices-filter').show();
+    var datas = question['datas'];
+    switch (question['type']) {
+        case "Checkbox":
+        case "Multiple Choice":
+            var choices = "";
+            for (var i = 0; i < datas.length; i++) {
+                choices += "<div class='checkbox'> " +
+                    "<label><input class='choice-checkbox' type='checkbox' value='" + datas[i]['id'] + "'>" +
+                    datas[i]['label'] +
+                    "</label> </div>";
+            }
+            $('#question-choices').html(choices);
+            initializeApply(question);
+            break;
+        case "Rating Scale":
+            var choices = "";
+            for (var i = 0; i < datas.length; i++) {
+                choices += "<div class='checkbox'> " +
+                    "<label><input class='choice-checkbox' type='checkbox' value='" + datas[i]['label'] + "'>" +
+                    datas[i]['label'] +
+                    "</label> </div>";
+            }
+            $('#question-choices').html(choices);
+            initializeApply(question);
+            break;
+        case "Likert Scale":
+            //TODO
+            break;
+        case "Textbox":
+        case "Text Area":
+            $('#question-choices').html("<div class='form-group'><input type='text' placeholder='Contains Keyword'></div>");
+            break;
+    }
+
+}
+
+function initializeApply(question) {
+    $('.choices-filter > .range_inputs .applyBtn').click(function () {
+        var selectedChoices = [];
+        $('.choice-checkbox:checked').each(function () {
+            selectedChoices.push($(this).val());
+        });
+
+        var data = {
+            id: question['id'],
+            values: selectedChoices
+        };
+
+        hideDropdown()
+        filter("question", data);
+    });
+}
+
+function hideDropdown() {
+    $('.dropdown-menu').hide();
+    hidden = true;
+}
 
 function filterDate() {
     // console.log(minDate);
@@ -139,5 +217,108 @@ function filterDate() {
         // setGetParameter('start', start.format('YYYY-MM-DD'));
         // setGetParameter('end', end.format('YYYY-MM-DD'));
         window.location.replace(window.location.pathname + '?start=' + start.format('YYYY-MM-DD') + '&end=' + end.format('YYYY-MM-DD'));
+    });
+}
+
+function initializeCharts() {
+    for (var i = 1; i <= results.length; i++) {
+        var data = results[i - 1]['datas'];
+        if (data.length < 1 || data == null) {
+            $('#chart' + i).html("<h2>No Data Found :(</h2>");
+            continue;
+        }
+        if (results[i - 1]['type'] == 'Likert Scale') {
+//                console.log("earl is real");
+            var bar_data = {
+                data: data,
+                color: "#3c8dbc"
+            };
+            barChart('#chart' + i, [bar_data]);
+        } else {
+            donutChart('#chart' + i, data);
+        }
+    }
+
+    function donutChart(context, data) {
+        $.plot(context, data, {
+            series: {
+                pie: {
+                    innerRadius: 0.5,
+                    show: true,
+                    radius: 1,
+                    label: {
+                        show: true,
+                        radius: 1,
+                        formatter: labelFormatter,
+                        background: {
+                            opacity: 0.5,
+                            color: '#000'
+                        }
+                    }
+                }
+            },
+            legend: {
+                show: true
+            }
+        });
+    }
+
+    function barChart(context, data) {
+        $.plot(context, data, {
+            grid: {
+                borderWidth: 1,
+                borderColor: "#f3f3f3",
+                tickColor: "#f3f3f3"
+            },
+            series: {
+                bars: {
+                    show: true,
+                    barWidth: 0.5,
+                    align: "center",
+                    horizontal: false
+                }
+            },
+            xaxis: {
+                label: "choices",
+                mode: "categories",
+                tickLength: 0
+            }
+        });
+    }
+
+    function labelFormatter(label, series) {
+        return '<div style="font-size:13px; text-align:center; padding:2px; color: #fff; font-weight: 600;">'
+            + label
+            + "<br>"
+            + series.percent.toFixed(2) + "%</div>";
+    }
+}
+
+function initializeRemoveFilter() {
+    $('.remove-filter').click(function () {
+        $.ajax({
+            type: 'DELETE',
+            data: {
+                key: $(this).data('key'),
+                id: $(this).data('id')
+            },
+            beforeSend: function () {
+                console.log("sending...");
+                $('#page-loader').show();
+            },
+            success: function (data) {
+                $('#results').html(data);
+            },
+            error: function (data) {
+                console.log(data);
+                errorToast();
+            },
+            complete: function () {
+                initializeCharts();
+                console.log("complete!");
+                $('#page-loader').hide();
+            }
+        });
+
     });
 }

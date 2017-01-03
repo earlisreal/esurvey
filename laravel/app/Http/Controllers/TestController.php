@@ -32,42 +32,47 @@ class TestController extends Controller
 
 
         $responses = Survey::find(2)->responses()
-            ->whereHas('responseDetails', function ($query) use ($filters) {
-                foreach ($filters['choices'] as $choice) {
-                    $query->orWhere('choice_id', $choice);
-                }
-            })
-            //TEXT ANSWER / RATING SCALE
-            ->whereHas('responseDetails', function ($subQuery) use ($filters) {
-                foreach ($filters['texts'] as $id => $texts) {
-                    $subQuery->where(function ($query) use ($id, $texts) {
-                        $query->where('question_id', $id);
-                        $query->where(function ($q) use ($texts) {
-                            foreach ($texts as $text) {
-                                $q->orWhere('text_answer', $text);
-                            }
-                        });
+            ->where(function ($base) use ($filters) {
+                if (!empty($filters['choices'])) {
+                    $base->whereHas('responseDetails', function ($query) use ($filters) {
+                        $query->whereIn('choice_id', $filters['choices']); //USE whereIn instead of iterating each value
                     });
                 }
-            })
-            //LIKERT SCALE
-            ->whereHas('responseDetails', function ($query) use ($filters) {
-                foreach ($filters['rows'] as $id => $choices) {
-                    $query->where(function ($subQuery) use ($id, $choices) {
-                        $subQuery->where('row_id', $id);
-                        $subQuery->where(function ($q) use ($choices) {
-                            foreach ($choices as $choice) {
-                                $q->orWhere('choice_id', $choice);
-                            }
-                        });
+
+                if (!empty($filters['texts'])) {
+                    //TEXT ANSWER / RATING SCALE
+                    $base->whereHas('responseDetails', function ($query) use ($filters) {
+                        foreach ($filters['texts'] as $id => $texts) {
+                                $query->where('question_id', $id);
+                                $query->whereIn('text_answer', $texts);
+                        }
                     });
                 }
-            })
-            ->whereHas('user', function ($subQuery) use ($filters) { //FILTER USER INFO
-                foreach ($filters['user'] as $field => $values) {
-                    $subQuery->where(function ($query) use ($field, $values) {
-                        foreach ($values as $value) {
-                            $query->orWhere($field, $value);
+
+                if (!empty($filters['rows'])) {
+                    //LIKERT SCALE
+                    $base->whereHas('responseDetails', function ($query) use ($filters) {
+                        foreach ($filters['rows'] as $id => $choices) {
+                            $query->where(function ($subQuery) use ($id, $choices) {
+                                $subQuery->where('row_id', $id);
+                                $subQuery->where(function ($q) use ($choices) {
+                                    foreach ($choices as $choice) {
+                                        $q->orWhere('choice_id', $choice);
+                                    }
+                                });
+                            });
+                        }
+                    });
+                }
+
+                if (!empty($filters['user'])) {
+                    $base->whereHas('user', function ($subQuery) use ($filters) { //FILTER USER INFO
+                        foreach ($filters['user'] as $field => $values) {
+                            $subQuery->where(function ($query) use ($field, $values) {
+                                foreach ($values as $value) {
+                                    $query->orWhere($field, $value);
+                                }
+                            });
                         }
                     });
                 }
@@ -76,6 +81,8 @@ class TestController extends Controller
 //            ->where('created_at', '>=', $start)
 //            ->where('created_at', '<=', $end)
             ->when(!empty($start) && !empty($end), function ($query) use ($start, $end) {
+                $start = Carbon::parse($start)->startOfDay();
+                $end = Carbon::parse($end)->endOfDay();
                 $query->whereBetween('created_at', [$start, $end]);
             })
             ->toSql();
