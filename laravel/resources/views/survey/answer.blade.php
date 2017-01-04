@@ -2,7 +2,7 @@
 
 @section('content')
     <div class="content">
-
+        <audio id="sound-test" src="{{asset('public/sounds/speech/result.wav') }}"></audio>
         <div class="row">
             <div class="col-lg-offset-2 col-lg-8">
                 <h1>{{ $survey->survey_title }}</h1>
@@ -53,6 +53,7 @@
                                         }
                                         ?>
                                         <div class="row">
+                                            <audio id="voice{{$question->id}}" src="{{ asset('public/sounds/speech/result.wav') }}"></audio>
                                             <div class="col-xs-12">
                                                 <div class="form-group">
                                                     <label for="{{ $question->id }}">
@@ -63,6 +64,8 @@
                                                             @if($question->is_mandatory)
                                                                 <span class="text-red">*</span>
                                                             @endif
+
+                                                            <button type="button" data-id="{{$question->id}}" class="play-audio close" style="float: none;"><i class="fa fa-volume-up" aria-hidden="true"></i></button>
                                                         </h3>
                                                     </label>
 
@@ -173,7 +176,13 @@
 
 @section('scripts')
     <script>
+//        $('#sound-test')[0].play();
         console.log("earl is rteal");
+
+        $('.play-audio').click(function () {
+            $('#voice' +$(this).data('id'))[0].play();
+        });
+
         $('.rating-scale').barrating({
             theme: 'fontawesome-stars',
             // showValues: true,

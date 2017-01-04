@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\SaveQuestionSpeech;
 use App\Question;
 use App\QuestionChoice;
 use App\QuestionOption;
@@ -14,15 +15,19 @@ use App\SurveyOption;
 use App\SurveyPage;
 use App\User;
 use Carbon\Carbon;
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\RequestException;
 use Illuminate\Http\Request;
 use App\SurveyCategory;
 use App\Http\Requests;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Repositories\TaskRepository;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\View;
 use Log;
 use Gate;
+use Psr\Http\Message\ResponseInterface;
 
 class SurveyController extends Controller
 {
@@ -172,7 +177,7 @@ class SurveyController extends Controller
                         $option->save();
                     }
                     $this->saveChoices($type, $question, $request->choices);
-                    if($type->type == "Likert Scale"){
+                    if ($type->type == "Likert Scale") {
                         $this->saveRows($question, $request->rows);
                     }
                 });
@@ -213,7 +218,7 @@ class SurveyController extends Controller
                 $newchoice->question()->associate($question);
 
                 //Save question rows for Likert Scale
-                if($type->type == "Likert Scale"){
+                if ($type->type == "Likert Scale") {
                     $newchoice->weight = $choice['weight'];
                 }
                 $newchoice->save();
@@ -221,8 +226,9 @@ class SurveyController extends Controller
         }
     }
 
-    private function saveRows($question, $rows){
-        foreach ($rows as $row){
+    private function saveRows($question, $rows)
+    {
+        foreach ($rows as $row) {
             $newRow = new QuestionRow([
                 'label' => $row
             ]);
@@ -489,6 +495,8 @@ class SurveyController extends Controller
                 'survey_id' => $id,
             ]);
         });
+
+        $this->dispatch(new SaveQuestionSpeech($survey));
 
         if ($survey->is_template) {
             return redirect('admin/templates');

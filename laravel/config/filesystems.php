@@ -43,6 +43,11 @@ return [
 
     'disks' => [
 
+        'sound' => [
+            'driver' => 'local',
+            'root' => base_path('../public/sounds'),
+        ],
+
         'local' => [
             'driver' => 'local',
             'root' => storage_path('app'),

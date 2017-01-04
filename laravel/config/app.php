@@ -13,6 +13,10 @@ return [
 
     'alchemy_key' => env('KEY_ALCHEMY', 'get your Api key at IBM watsons'),
 
+    'tts_username' => env('KEY_TTS_USERNAME', 'get your Api key at IBM watsons'),
+
+    'tts_password' => env('KEY_TTS_PASSWORD', 'get your Api key at IBM watsons'),
+
 
     /*
     |--------------------------------------------------------------------------
