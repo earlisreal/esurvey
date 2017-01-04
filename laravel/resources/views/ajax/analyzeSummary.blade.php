@@ -19,6 +19,8 @@
                                 <td>
                                     <b>Date: </b>
                                     {{ $filters['date']['start'] }} to {{ $filters['date']['end'] }}
+                                </td>
+                                <td>
                                     <button type="button" class="close remove-filter" data-toggle="tooltip"
                                             title="Remove Filter"
                                             data-key="date" data-dismiss="modal" aria-label="Close"><span
@@ -30,13 +32,23 @@
                             @foreach($filters['question'] as $id => $values)
                                 <tr>
                                     <td>
-                                        <b>{{ \App\Question::find($id)->question_title }}: </b>
-                                        @foreach($values as $value)
-                                            {{ \App\QuestionChoice::find($value)->label }},
+                                        <?php $question = \App\Question::find($id); ?>
+                                        <b>{{ $question->question_title }}: </b>
+                                        @foreach($values as $key => $value)
+                                            @if($question->questionType->type == "Likert Scale")
+                                                {{ \App\QuestionRow::find($key)->label }} :
+                                                @foreach($value as $choice)
+                                                    {{ \App\QuestionChoice::find($choice)->label }},
+                                                @endforeach
+                                            @else
+                                                {{ \App\QuestionChoice::find($value)->label }},
+                                            @endif
                                         @endforeach
+                                    </td>
+                                    <td>
                                         <button type="button" class="close remove-filter" data-toggle="tooltip"
-                                                data-key="question" data-id="{{ $id }}" title="Remove Filter"
-                                                data-dismiss="modal" aria-label="Close"><span
+                                                title="Remove Filter"
+                                                data-key="date" data-dismiss="modal" aria-label="Close"><span
                                                     aria-hidden="true">&times;</span></button>
                                     </td>
                                 </tr>
@@ -78,7 +90,7 @@
                         <tr>
                             <th></th>
                             @foreach($grid['headers'] as $header)
-                                <th>{{ $header }}</th>
+                                <th>{{ $header['label'] }}</th>
                             @endforeach
                             <th>Total</th>
                             <th>Average</th>

@@ -92,15 +92,19 @@ class ResultController extends Controller
                     ['start' => $datas['start'], 'end' => $datas['end']]);
                 break;
             case "question":
-                $questions = [];
+                $question = Question::find($datas['id']);
+                $filters = [];
                 if (Cache::has('question' . $id)) {
-                    $datas = $request->datas;
-                    $questions = Cache::get('question' . $id);
+                    $filters = Cache::get('question' . $id);
                 }
-                $questions[$datas['id']] = $datas['values'];
-                Log::info("QUESTION FILTER TEST:");
 
-                Cache::forever('question' . $id, $questions);
+                if($question->questionType->type == "Likert Scale"){
+                    $filters[$datas['id']][$datas['row']] = $datas['values'];
+                }else{
+                    $filters[$datas['id']] = $datas['values'];
+                }
+                Log::info("QUESTION FILTER TEST:");
+                Cache::forever('question' . $id, $filters);
                 Log::info(Cache::get('question' . $id));
                 break;
             case "texts":
@@ -186,31 +190,40 @@ class ResultController extends Controller
                                 Log::info("ID -> " . $id);
                                 Log::info($values);
                                 $query->where('question_id', $id);
-                                if (Question::find($id)->questionType->type != "Rating Scale") {
-                                    $query->whereIn('choice_id', $values);
-                                } else {
+                                $type = Question::find($id)->questionType->type;
+                                if ($type == "Rating Scale") {
                                     $query->whereIn('text_answer', $values);
+                                }else if($type == "Likert Scale"){
+                                    $query->where(function ($subQuery) use($values){
+                                        foreach ($values as $row => $choices){
+                                            $subQuery->where('row_id', $row);
+                                            $subQuery->whereIn('choice_id', $choices);
+                                        }
+                                    });
+                                }
+                                else {
+                                    $query->whereIn('choice_id', $values);
                                 }
                             }
                         });
                     }
                 }
 
-                if (!empty($filters['rows'])) {
-                    //LIKERT SCALE
-                    $base->whereHas('responseDetails', function ($query) use ($filters) {
-                        foreach ($filters['rows'] as $id => $choices) {
-                            $query->where(function ($subQuery) use ($id, $choices) {
-                                $subQuery->where('row_id', $id);
-                                $subQuery->where(function ($q) use ($choices) {
-                                    foreach ($choices as $choice) {
-                                        $q->orWhere('choice_id', $choice);
-                                    }
-                                });
-                            });
-                        }
-                    });
-                }
+//                if (!empty($filters['rows'])) {
+//                    //LIKERT SCALE
+//                    $base->whereHas('responseDetails', function ($query) use ($filters) {
+//                        foreach ($filters['rows'] as $id => $choices) {
+//                            $query->where(function ($subQuery) use ($id, $choices) {
+//                                $subQuery->where('row_id', $id);
+//                                $subQuery->where(function ($q) use ($choices) {
+//                                    foreach ($choices as $choice) {
+//                                        $q->orWhere('choice_id', $choice);
+//                                    }
+//                                });
+//                            });
+//                        }
+//                    });
+//                }
 
                 if (!empty($filters['user'])) {
                     $base->whereHas('user', function ($subQuery) use ($filters) { //FILTER USER INFO
@@ -224,6 +237,7 @@ class ResultController extends Controller
                     });
                 }
             })
+//            ->toSql();
             //FILTER DATES
 //            ->where('created_at', '>=', $start)
 //            ->where('created_at', '<=', $end)
@@ -312,7 +326,7 @@ class ResultController extends Controller
                         break;
                     case "Likert Scale":
                         foreach ($question->choices as $choice) {
-                            $headers[] = $choice->label;
+                            $headers[] = array('label' => $choice->label, 'id' => $choice->id);
                         }
                         foreach ($question->rows as $row) {
                             $sum = 0;
@@ -330,7 +344,7 @@ class ResultController extends Controller
                             }
                             $count = $question->choices->count();
                             $average = $total > 0 ? number_format($sum / $total, 2) : 0;
-                            $rows[] = array('label' => $row->label, 'cols' => $cols,
+                            $rows[] = array('label' => $row->label, 'cols' => $cols, 'id' => $row->id,
                                 'total' => $total, 'average' => $average);
                             $datas[] = array($row->label, $average);
                         }

@@ -102,7 +102,7 @@ class TestController extends Controller
                 ]
             ]);
 
-        Storage::put('public/voice/result.wav', $res->getBody());
+        Storage::disk('local')->put('public/voice/result2.wav', $res->getBody());
         Log::info($res->getHeaders());
         return $res->getBody();
     }

@@ -76,7 +76,6 @@
 
                             <div class="dropdown-menu question-filter dropdown-content" style="min-width: 320px;">
                                 <label for="">Question answer</label>
-
                                 <select name="question" id="question-select" class="form-control"
                                         style="margin-bottom: 10px">
                                 </select>
@@ -89,7 +88,13 @@
 
                             <div class="dropdown-menu choices-filter dropdown-content" style="min-width: 320px;">
                                 <label id="question-label">Question Choices</label>
-
+                                <div class="form-group">
+                                    <select name="rows" id="question-rows">
+                                        <option value="">Select a Row</option>
+                                        <option value="">Test</option>
+                                        <option value="">Test</option>
+                                    </select>
+                                </div>
                                 <form action="" id="question-choices">
 
                                 </form>

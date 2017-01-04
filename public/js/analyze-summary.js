@@ -37,6 +37,8 @@ function setupFilter() {
         }
     });
 
+    initializeApply();
+
     $('#start-date, #end-date').datepicker({
         autoclose: true,
         format: 'MM d, yyyy'
@@ -103,9 +105,10 @@ function filter(type, datas) {
 }
 
 function showChoices(index) {
+    $('#question-rows').hide();
     console.log("index -> " + index);
     var question = results[index];
-    console.log(question);
+    // console.log(question);
     $('#question-label').html("Q" + (parseInt(index) + 1) + ": " + question['questionTitle']);
     $('.question-filter').hide();
     $('.choices-filter').show();
@@ -121,7 +124,6 @@ function showChoices(index) {
                     "</label> </div>";
             }
             $('#question-choices').html(choices);
-            initializeApply(question);
             break;
         case "Rating Scale":
             var choices = "";
@@ -132,10 +134,36 @@ function showChoices(index) {
                     "</label> </div>";
             }
             $('#question-choices').html(choices);
-            initializeApply(question);
             break;
         case "Likert Scale":
-            //TODO
+            $('#question-choices').hide();
+            var grid = question['grid'];
+            var headers = grid['headers'];
+            var rows = grid['rows'];
+
+            var options = "<option value='-1'>Select a Row</option>";
+            for (var i = 0; i < rows.length; i++){
+                options += "<option value='" +rows[i]['id'] +"'>" +rows[i]['label'] +"</option>";
+            }
+            $('#question-rows').html(options);
+            $('#question-rows').show();
+
+            $('#question-rows').change(function () {
+                if($(this).val() != '-1'){
+                    $('#question-choices').show();
+                }else{
+                    $('#question-choices').hide();
+                }
+            });
+
+            var choices = "";
+            for (var i = 0; i < headers.length; i++) {
+                choices += "<div class='checkbox'> " +
+                    "<label><input class='choice-checkbox' type='checkbox' value='" + headers[i]['id'] + "'>" +
+                    headers[i]['label'] +
+                    "</label> </div>";
+            }
+            $('#question-choices').html(choices);
             break;
         case "Textbox":
         case "Text Area":
@@ -145,19 +173,36 @@ function showChoices(index) {
 
 }
 
-function initializeApply(question) {
+function initializeApply() {
     $('.choices-filter > .range_inputs .applyBtn').click(function () {
+
+        var question = results[$('#question-select').val()];
+        // console.log(question);
+
+        hideDropdown();
+
         var selectedChoices = [];
         $('.choice-checkbox:checked').each(function () {
             selectedChoices.push($(this).val());
         });
 
+        var row = $('#question-rows').val();
+
+        if(row == '-1'){
+            //NO ROW SELECTED
+            return false;
+        }
+
+        if(selectedChoices.length < 1){
+            return false;
+        }
+
         var data = {
             id: question['id'],
-            values: selectedChoices
+            values: selectedChoices,
+            row: row
         };
 
-        hideDropdown()
         filter("question", data);
     });
 }
@@ -221,9 +266,10 @@ function filterDate() {
 }
 
 function initializeCharts() {
+    console.log(results);
     for (var i = 1; i <= results.length; i++) {
         var data = results[i - 1]['datas'];
-        if (data.length < 1 || data == null) {
+        if (results[i-1]['total'] == "0") {
             $('#chart' + i).html("<h2>No Data Found :(</h2>");
             continue;
         }
