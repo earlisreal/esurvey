@@ -137,7 +137,7 @@ class ResultController extends Controller
                 Log::info($questions[$request->id][$request->row]);
                 unset($questions[$request->id][$request->row]);
             }else{
-                unset($questions[$request->key]);
+                unset($questions[$request->id]);
             }
             Cache::forever('question' . $id, $questions);
         } else if ($key == "date") {
@@ -199,28 +199,37 @@ class ResultController extends Controller
                     if (count($questions) > 0) {
                         Log::info("QUESTION READ");
                         Log::info($questions);
-                        $base->whereHas('responseDetails', function ($query) use ($questions) {
+                        $base->where(function ($query) use ($questions){
                             foreach ($questions as $id => $values) {
-                                Log::info("ID -> " . $id);
-                                Log::info($values);
-                                $query->where('question_id', $id);
+
                                 $type = Question::find($id)->questionType->type;
                                 if ($type == "Rating Scale") {
-                                    $query->whereIn('text_answer', $values);
+                                    $query->whereHas('responseDetails', function ($subQuery) use ($id, $values, $type) {
+                                        $subQuery->where('question_id', $id);
+                                        $subQuery->whereIn('text_answer', $values);
+                                    });
                                 } else if ($type == "Likert Scale") {
-                                    $query->where(function ($subQuery) use ($values) {
-                                        foreach ($values as $row => $choices) {
+                                    foreach ($values as $row => $choices) {
+                                        $query->whereHas('responseDetails', function ($subQuery) use ($row, $choices) {
                                             $subQuery->where('row_id', $row);
                                             $subQuery->whereIn('choice_id', $choices);
-                                        }
-                                    });
+                                        });
+                                    }
                                 } else {
-                                    $query->whereIn('choice_id', $values);
+                                    $query->whereHas('responseDetails', function ($subQuery) use ($id, $values, $type) {
+                                        $subQuery->where('question_id', $id);
+                                        $subQuery->whereIn('choice_id', $values);
+                                    });
                                 }
+
+
                             }
                         });
                     }
                 }
+
+                //TODO
+                //BALIKTAD UNG WHERE SAKA WHERE HAS
 
                 if (!empty($filters['user'])) {
                     $base->whereHas('user', function ($subQuery) use ($filters) { //FILTER USER INFO
