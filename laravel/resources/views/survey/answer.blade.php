@@ -118,15 +118,25 @@
                                                                    value="{{ old('question'.$question->id) }}"
                                                                     {{ $question->is_mandatory ? 'required' : '' }}>
                                                             <div class="input-group-btn">
-                                                                <button class="btn btn-default record-voice" type="button"><i
+                                                                <button class="btn btn-default record-voice"
+                                                                        type="button"><i
                                                                             class="fa fa-microphone"></i></button>
                                                             </div>
                                                         </div>
                                                     @elseif($type == "Text Area")
-                                                        <textarea name="question{{ $question->id }}"
-                                                                  id="question{{ $question->id }}" cols="30"
-                                                                  rows="4"
-                                                                  class="form-control" {{ $question->is_mandatory ? 'required' : '' }}>{{ old('question'.$question->id) }}</textarea>
+                                                        <div class="input-group">
+                                                             <textarea name="question{{ $question->id }}"
+                                                                       id="question{{ $question->id }}" cols="30"
+                                                                       rows="4"
+                                                                       class="form-control"
+                                                                     {{ $question->is_mandatory ? 'required' : '' }}>{{ old('question'.$question->id) }}</textarea>
+                                                            <div class="input-group-btn">
+                                                                <button class="btn btn-default record-voice"
+                                                                        type="button"><i
+                                                                            class="fa fa-microphone"></i></button>
+                                                            </div>
+                                                        </div>
+
                                                     @elseif($type == "Likert Scale")
                                                         <table class="table">
                                                             <tbody>
@@ -187,7 +197,7 @@
 @section('scripts')
     <script>
         //        $('#sound-test')[0].play();
-//        console.log("earl is rteal");
+        //        console.log("earl is rteal");
 
         $('.play-audio').click(function () {
             $('#voice' + $(this).data('id'))[0].play();
@@ -216,7 +226,7 @@
                 recognition.lang = "en-US";
                 recognition.start();
 
-                recognition.onresult = function(e) {
+                recognition.onresult = function (e) {
                     console.log("voice found");
                     console.log(e.results[0][0].transcript);
                     inputText.val(e.results[0][0].transcript);
@@ -224,7 +234,7 @@
 //                    document.getElementById('labnol').submit();
                 };
 
-                recognition.onerror = function(e) {
+                recognition.onerror = function (e) {
                     recognition.stop();
                 }
 

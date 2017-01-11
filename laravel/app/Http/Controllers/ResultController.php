@@ -71,9 +71,9 @@ class ResultController extends Controller
             ]);
         }
 
-        $datas = $this->getResults($survey, $request);
+        $datas = $this->getResults($survey);
 
-        return view('survey.survey-summary', [
+        return view('survey.analyze.analyze-summary', [
             'survey' => $survey,
             'results' => $datas['results'],
             'totalResponse' => $datas['totalResponse'],
@@ -115,16 +115,31 @@ class ResultController extends Controller
                 break;
         }
 
-        return view('ajax.analyzeSummary', $this->getResults($survey));
+        if ($request->inSummaryTab) {
+            return view('ajax.analyze-summary', $this->getResults($survey));
+        } else {
+            $responses = $this->getResponses($survey);
+            return view('ajax.analyze-user', $this->getResults($survey));
+        }
     }
 
     public function removeFilter($id, Request $request)
     {
+        Log::info($request);
+        $survey = Survey::findOrFail($id);
         $key = $request->key;
         if ($key == "question") {
-            $questions = Cache::get($key . $id);
-            unset($questions[$request->id]);
-            Cache::forever($key . $id, $questions);
+            $questions = Cache::get('question' . $id);
+            $question = Question::find($request->id);
+            if($question->questionType->type == "Likert Scale"){
+                Log::info("LOG FROM EARL");
+                Log::info($questions[$request->id]);
+                Log::info($questions[$request->id][$request->row]);
+                unset($questions[$request->id][$request->row]);
+            }else{
+                unset($questions[$request->key]);
+            }
+            Cache::forever('question' . $id, $questions);
         } else if ($key == "date") {
             Cache::pull('date' . $id);
         } else if ($key == "all") {
@@ -132,7 +147,11 @@ class ResultController extends Controller
             Cache::pull('date' . $id);
         }
 
-        return view('ajax.analyzeSummary', $this->getResults(Survey::find($id)));
+        if ($request->inSummaryTab) {
+            return view('ajax.analyze-summary', $this->getResults($survey));
+        } else {
+            return view('ajax.analyze-user', $this->getResults($survey));
+        }
     }
 
     private function getFilters($id)
@@ -157,17 +176,12 @@ class ResultController extends Controller
         return $filters;
     }
 
-    private function getResults(Survey $survey)
+    private function getResponses(Survey $survey)
     {
-
-
-        /***************************************************************************************************************
-         *                              RESULT MANIPULATION START HERE                                                 *
-         **************************************************************************************************************/
 
         $filters = $this->getFilters($survey->id);
 
-        Log::info($filters);
+//        Log::info($filters);
 
         $start = $survey->responses->sortBy('created_at')->first()->created_at;
         $end = Carbon::parse($survey->responses->sortByDesc('created_at')->first()->created_at)->endOfDay();
@@ -179,7 +193,6 @@ class ResultController extends Controller
         }
 
         $responses = $survey->responses()
-            ->select('id')
             ->where(function ($base) use ($filters, $survey) {
                 if (!empty($filters['question'])) {
                     $questions = $filters['question'];
@@ -209,22 +222,6 @@ class ResultController extends Controller
                     }
                 }
 
-//                if (!empty($filters['rows'])) {
-//                    //LIKERT SCALE
-//                    $base->whereHas('responseDetails', function ($query) use ($filters) {
-//                        foreach ($filters['rows'] as $id => $choices) {
-//                            $query->where(function ($subQuery) use ($id, $choices) {
-//                                $subQuery->where('row_id', $id);
-//                                $subQuery->where(function ($q) use ($choices) {
-//                                    foreach ($choices as $choice) {
-//                                        $q->orWhere('choice_id', $choice);
-//                                    }
-//                                });
-//                            });
-//                        }
-//                    });
-//                }
-
                 if (!empty($filters['user'])) {
                     $base->whereHas('user', function ($subQuery) use ($filters) { //FILTER USER INFO
                         foreach ($filters['user'] as $field => $values) {
@@ -237,20 +234,28 @@ class ResultController extends Controller
                     });
                 }
             })
-//            ->toSql();
-            //FILTER DATES
-//            ->where('created_at', '>=', $start)
-//            ->where('created_at', '<=', $end)
-
             ->whereBetween('created_at', [$start, $end])
-            ->pluck('id');
+            ->get();
 
+        return $responses;
+    }
+
+    private function getResults(Survey $survey)
+    {
+
+
+        /***************************************************************************************************************
+         *                              RESULT MANIPULATION START HERE                                                 *
+         **************************************************************************************************************/
+        $filters = $this->getFilters($survey->id);
+        $responses = $this->getResponses($survey);
+        $responseIds = $responses->pluck('id');
 //        return var_dump($responses);
 //        Log::info($responses);
 
         $results = [];
         $responseCount = $survey->responses()->count();
-        $totalResponse = $responses->count();
+        $totalResponse = $responseIds->count();
 
 //        Log::info("COUNT -> " . $totalResponse);
 
@@ -268,16 +273,10 @@ class ResultController extends Controller
                 $datas = [];
                 switch ($type) {
                     case "Checkbox":
-//                        $respondents = count(
-//                            $question->responses()
-//                                ->where('created_at', '>=', $start)
-//                                ->where('created_at', '<=', $end)
-//                                ->groupBy('response_id')
-//                                ->get());
                     case "Multiple Choice":
                         foreach ($question->choices as $choice) {
                             $count = DB::table('response_details')
-                                ->whereIn('response_id', $responses)
+                                ->whereIn('response_id', $responseIds)
                                 ->where('choice_id', $choice->id)
                                 ->where('question_id', $question->id)
                                 ->count();
@@ -291,7 +290,7 @@ class ResultController extends Controller
                     case "Textbox":
                     case "Text Area":
                         $details = DB::table('response_details')
-                            ->whereIn('response_id', $responses)
+                            ->whereIn('response_id', $responseIds)
                             ->select(DB::raw('sentiment, COUNT(*) as sentiment_count'))
                             ->where('question_id', $question->id)
                             ->where('text_answer', '<>', 'NULL')
@@ -308,12 +307,12 @@ class ResultController extends Controller
                         $maxRate = $question->option->max_rating;
                         $average = number_format(
                             DB::table('response_details')
-                                ->whereIn('response_id', $responses)
+                                ->whereIn('response_id', $responseIds)
                                 ->where('question_id', $question->id)
                                 ->avg('text_answer'), 2);
                         for ($i = 1; $i <= $maxRate; $i++) {
                             $count = DB::table('response_details')
-                                ->whereIn('response_id', $responses)
+                                ->whereIn('response_id', $responseIds)
                                 ->where('question_id', $question->id)
                                 ->where('text_answer', $i)
                                 ->count();
@@ -327,7 +326,7 @@ class ResultController extends Controller
                     case "Likert Scale":
                         foreach ($question->choices as $choice) {
                             $headers[] = array(
-                                'label' => $choice->label ."(" .$choice->weight .")",
+                                'label' => $choice->label . "(" . $choice->weight . ")",
                                 'id' => $choice->id
                             );
                         }
@@ -337,7 +336,7 @@ class ResultController extends Controller
                             $cols = [];
                             foreach ($question->choices as $choice) {
                                 $count = DB::table('response_details')
-                                    ->whereIn('response_id', $responses)
+                                    ->whereIn('response_id', $responseIds)
                                     ->where('row_id', $row->id)
                                     ->where('choice_id', $choice->id)
                                     ->count();
@@ -356,7 +355,7 @@ class ResultController extends Controller
                 if ($type == "Checkbox" || $type == "Likert Scale") {
                     $respondents = count(
                         DB::table('response_details')
-                            ->whereIn('response_id', $responses)
+                            ->whereIn('response_id', $responseIds)
                             ->where('question_id', $question->id)
                             ->where('choice_id', '<>', 'NULL')
                             ->groupBy('response_id')
@@ -382,6 +381,7 @@ class ResultController extends Controller
 //        Log::info($results);
 
         return array(
+            'responses' => $responses,
             'filters' => $filters,
             'results' => $results,
             'totalResponse' => $totalResponse,
@@ -391,8 +391,15 @@ class ResultController extends Controller
 
     public function user($id)
     {
-        return view('survey.analyzeByUser', [
-            'survey' => Survey::find($id)
+        $survey = Survey::findOrFail($id);
+        $datas = $this->getResults($survey);
+        return view('survey.analyze.analyze-user', [
+            'survey' => $survey,
+            'responses' => $datas['responses'],
+            'results' => $datas['results'],
+            'totalResponse' => $datas['totalResponse'],
+            'responseCount' => $datas['responseCount'],
+            'filters' => $datas['filters']
         ]);
     }
 

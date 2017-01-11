@@ -18,7 +18,7 @@
 @section('content-header')
     <section class="content-header">
         <h1>
-            {{ $survey->survey_title }} Statistics
+            Analyze {{ $survey->survey_title }}
         </h1>
         <ol class="breadcrumb">
             <li><a href="{{ url('/') }}"><i class="fa fa-dashboard"></i> Home</a></li>
@@ -32,10 +32,10 @@
 @section('content')
 
     <ul class="nav nav-tabs">
-        <li role="presentation" class="active"><a href="{{ url('/analyze/' .$survey->id .'/summary') }}"
+        <li role="presentation" class="{{ Request::is('analyze/'.$survey->id.'/summary') ? 'active' : '' }}"><a href="{{ url('/analyze/' .$survey->id .'/summary') }}"
                                                   aria-controls="home" role="tab"><i class="fa fa-pie-chart"></i>
                 Summary</a></li>
-        <li role="presentation"><a href="{{ url('/analyze/' .$survey->id .'/user') }}" aria-controls="by-user"
+        <li role="presentation" class="{{ Request::is('analyze/'.$survey->id.'/user') ? 'active' : '' }}"><a href="{{ url('/analyze/' .$survey->id .'/user') }}" aria-controls="by-user"
                                    role="tab"><i class="fa fa-users"></i> User Responses</a></li>
     </ul>
     <div class="tab-content" style="margin-top: 10px;">
@@ -120,9 +120,7 @@
                     </div>
                 </div>
 
-                <div id="results">
-                    @include('ajax.analyzeSummary')
-                </div>
+                @yield('results')
 
             </div>
         </div>
@@ -131,21 +129,3 @@
 
 @endsection
 
-@section('scripts')
-    <script src="{{ asset('public/plugins/datepicker/bootstrap-datepicker.js') }}"></script>
-    <!-- FLOT CHARTS -->
-    <script src="{{ asset('public/plugins/flot/jquery.flot.min.js') }}"></script>
-    <!-- FLOT RESIZE PLUGIN - allows the chart to redraw when the window is resized -->
-    <script src="{{ asset('public/plugins/flot/jquery.flot.resize.min.js') }}"></script>
-    <!-- FLOT PIE PLUGIN - also used to draw donut charts -->
-    <script src="{{ asset('public/plugins/flot/jquery.flot.pie.min.js') }}"></script>
-    <!-- FLOT CATEGORIES PLUGIN - Used to draw bar charts -->
-    <script src="{{ asset('public/plugins/flot/jquery.flot.categories.min.js') }}"></script>
-
-
-
-    <!-- SCRIPT -->
-    <script src="{{ asset('public/js/analyze-summary.js') }}"></script>
-
-
-@endsection
