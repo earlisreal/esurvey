@@ -31,7 +31,7 @@ $no = 1;
 
                                     {!! empty($detail->choice->label) ? '<small>Skipped</small>' : $detail->choice->label !!}
                                 @else
-                                    {!! empty($detail->text_answer) ? '<small>Skipped</small>' : $detail->text_answer !!}
+                                    {!! empty($detail->text_answer) ? '<small>Skipped</small>' : $detail->text_answer . (empty($detail->sentiment) ? '' : " (" .$detail->sentiment .")") !!}
                                 @endif
                             </h5>
                         </label>

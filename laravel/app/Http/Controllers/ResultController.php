@@ -98,9 +98,9 @@ class ResultController extends Controller
                     $filters = Cache::get('question' . $id);
                 }
 
-                if($question->questionType->type == "Likert Scale"){
+                if ($question->questionType->type == "Likert Scale") {
                     $filters[$datas['id']][$datas['row']] = $datas['values'];
-                }else{
+                } else {
                     $filters[$datas['id']] = $datas['values'];
                 }
                 Log::info("QUESTION FILTER TEST:");
@@ -118,17 +118,18 @@ class ResultController extends Controller
         return view('ajax.analyzeSummary', $this->getResults($survey));
     }
 
-    public function removeFilter($id, Request $request){
+    public function removeFilter($id, Request $request)
+    {
         $key = $request->key;
-        if($key == "question"){
-            $questions = Cache::get($key.$id);
+        if ($key == "question") {
+            $questions = Cache::get($key . $id);
             unset($questions[$request->id]);
-            Cache::forever($key.$id, $questions);
-        }else if($key == "date"){
-            Cache::pull('date'.$id);
-        }else if($key == "all"){
-            Cache::pull('question'.$id);
-            Cache::pull('date'.$id);
+            Cache::forever($key . $id, $questions);
+        } else if ($key == "date") {
+            Cache::pull('date' . $id);
+        } else if ($key == "all") {
+            Cache::pull('question' . $id);
+            Cache::pull('date' . $id);
         }
 
         return view('ajax.analyzeSummary', $this->getResults(Survey::find($id)));
@@ -193,15 +194,14 @@ class ResultController extends Controller
                                 $type = Question::find($id)->questionType->type;
                                 if ($type == "Rating Scale") {
                                     $query->whereIn('text_answer', $values);
-                                }else if($type == "Likert Scale"){
-                                    $query->where(function ($subQuery) use($values){
-                                        foreach ($values as $row => $choices){
+                                } else if ($type == "Likert Scale") {
+                                    $query->where(function ($subQuery) use ($values) {
+                                        foreach ($values as $row => $choices) {
                                             $subQuery->where('row_id', $row);
                                             $subQuery->whereIn('choice_id', $choices);
                                         }
                                     });
-                                }
-                                else {
+                                } else {
                                     $query->whereIn('choice_id', $values);
                                 }
                             }
@@ -326,7 +326,10 @@ class ResultController extends Controller
                         break;
                     case "Likert Scale":
                         foreach ($question->choices as $choice) {
-                            $headers[] = array('label' => $choice->label, 'id' => $choice->id);
+                            $headers[] = array(
+                                'label' => $choice->label ."(" .$choice->weight .")",
+                                'id' => $choice->id
+                            );
                         }
                         foreach ($question->rows as $row) {
                             $sum = 0;
@@ -367,6 +370,7 @@ class ResultController extends Controller
                     'questionTitle' => $question->question_title,
                     'total' => $total,
                     'grid' => array('rows' => $rows, 'headers' => $headers),
+                    'maxChoiceWeight' => $question->choices()->max('weight'),
                     'type' => $type,
                     'respondents' => $respondents,
                     'average' => $average,

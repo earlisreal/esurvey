@@ -205,6 +205,8 @@ $api->version('v1', function($api){
 
     $api->post('answer', 'App\Http\Controllers\AndroidController@store');
 
+    $api->get('speech/{id}', 'App\Http\Controllers\AndroidController@downloadSpeech');
+
 });
 
 

@@ -24,7 +24,6 @@ class TestController extends Controller
 {
     public function test(Request $request)
     {
-//        return Storage::disk('voice')->url('test');
         return view('test');
     }
 

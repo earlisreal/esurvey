@@ -2,7 +2,7 @@
 
 @section('content')
     <div class="content">
-        <audio id="sound-test" src="{{asset('public/sounds/speech/result.wav') }}"></audio>
+        {{--<audio id="sound-test" src="{{asset('public/sounds/speech/result.wav') }}"></audio>--}}
         <div class="row">
             <div class="col-lg-offset-2 col-lg-8">
                 <h1>{{ $survey->survey_title }}</h1>
@@ -53,7 +53,8 @@
                                         }
                                         ?>
                                         <div class="row">
-                                            <audio id="voice{{$question->id}}" src="{{ asset('public/sounds/speech/result.wav') }}"></audio>
+                                            <audio id="voice{{$question->id}}"
+                                                   src="{{ asset('public/sounds/speech/question' .$question->id .'.wav') }}"></audio>
                                             <div class="col-xs-12">
                                                 <div class="form-group">
                                                     <label for="{{ $question->id }}">
@@ -65,7 +66,10 @@
                                                                 <span class="text-red">*</span>
                                                             @endif
 
-                                                            <button type="button" data-id="{{$question->id}}" class="play-audio close" style="float: none;"><i class="fa fa-volume-up" aria-hidden="true"></i></button>
+                                                            <button type="button" data-id="{{$question->id}}"
+                                                                    class="play-audio close" style="float: none;"><i
+                                                                        class="fa fa-volume-up" aria-hidden="true"></i>
+                                                            </button>
                                                         </h3>
                                                     </label>
 
@@ -108,10 +112,16 @@
                                                             @endfor
                                                         </select>
                                                     @elseif($type == "Textbox")
-                                                        <input type="text" name="question{{ $question->id }}"
-                                                               id="question{{ $question->id }}" class="form-control"
-                                                               value="{{ old('question'.$question->id) }}"
-                                                                {{ $question->is_mandatory ? 'required' : '' }}>
+                                                        <div class="input-group">
+                                                            <input type="text" name="question{{ $question->id }}"
+                                                                   id="question{{ $question->id }}" class="form-control"
+                                                                   value="{{ old('question'.$question->id) }}"
+                                                                    {{ $question->is_mandatory ? 'required' : '' }}>
+                                                            <div class="input-group-btn">
+                                                                <button class="btn btn-default record-voice" type="button"><i
+                                                                            class="fa fa-microphone"></i></button>
+                                                            </div>
+                                                        </div>
                                                     @elseif($type == "Text Area")
                                                         <textarea name="question{{ $question->id }}"
                                                                   id="question{{ $question->id }}" cols="30"
@@ -176,11 +186,11 @@
 
 @section('scripts')
     <script>
-//        $('#sound-test')[0].play();
-        console.log("earl is rteal");
+        //        $('#sound-test')[0].play();
+//        console.log("earl is rteal");
 
         $('.play-audio').click(function () {
-            $('#voice' +$(this).data('id'))[0].play();
+            $('#voice' + $(this).data('id'))[0].play();
         });
 
         $('.rating-scale').barrating({
@@ -192,5 +202,33 @@
         if ($('.scroll').size() > 0) {
             scrollTo($('.scroll').first());
         }
+
+        $('.record-voice').click(function () {
+            console.log("Voice input");
+            var inputText = $(this).closest('.form-group').find('input');
+            if (window.hasOwnProperty('webkitSpeechRecognition')) {
+
+                var recognition = new webkitSpeechRecognition();
+
+                recognition.continuous = false;
+                recognition.interimResults = false;
+
+                recognition.lang = "en-US";
+                recognition.start();
+
+                recognition.onresult = function(e) {
+                    console.log("voice found");
+                    console.log(e.results[0][0].transcript);
+                    inputText.val(e.results[0][0].transcript);
+                    recognition.stop();
+//                    document.getElementById('labnol').submit();
+                };
+
+                recognition.onerror = function(e) {
+                    recognition.stop();
+                }
+
+            }
+        });
     </script>
 @endsection

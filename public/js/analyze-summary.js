@@ -279,7 +279,7 @@ function initializeCharts() {
                 data: data,
                 color: "#3c8dbc"
             };
-            barChart('#chart' + i, [bar_data]);
+            barChart('#chart' + i, [bar_data], results[i - 1]['maxChoiceWeight']);
         } else {
             donutChart('#chart' + i, data);
         }
@@ -309,7 +309,7 @@ function initializeCharts() {
         });
     }
 
-    function barChart(context, data) {
+    function barChart(context, data, maxWeight) {
         $.plot(context, data, {
             grid: {
                 borderWidth: 1,
@@ -328,6 +328,10 @@ function initializeCharts() {
                 label: "choices",
                 mode: "categories",
                 tickLength: 0
+            },
+            yaxis: {
+                tickDecimals: 0,
+                max: maxWeight
             }
         });
     }

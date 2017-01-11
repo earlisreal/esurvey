@@ -19,7 +19,6 @@
     <!-- HTML5 Speech Recognition API -->
     <script>
         function startDictation() {
-
             if (window.hasOwnProperty('webkitSpeechRecognition')) {
 
                 var recognition = new webkitSpeechRecognition();
@@ -29,8 +28,6 @@
 
                 recognition.lang = "en-US";
                 recognition.start();
-
-                recognition.
 
                 recognition.onresult = function(e) {
                     console.log("voice found");
@@ -52,14 +49,6 @@
 
 @section('scripts')
     <script>
-        $('#start').click(function () {
-           startRecording();
-        });
-
-        $('#stop').click(function () {
-            stopRecording();
-        });
-
         function hasGetUserMedia() {
             return !!(navigator.getUserMedia || navigator.webkitGetUserMedia ||
             navigator.mozGetUserMedia || navigator.msGetUserMedia);
@@ -75,12 +64,5 @@
         var errorCallback = function(e) {
             console.log('Reeeejected!', e);
         };
-
-        navigator.getUserMedia  = navigator.getUserMedia ||
-            navigator.webkitGetUserMedia ||
-            navigator.mozGetUserMedia ||
-            navigator.msGetUserMedia;
-
-        
     </script>
 @endsection

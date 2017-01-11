@@ -22,7 +22,7 @@ class AndroidController extends Controller
 {
     public function index()
     {
-        return json_encode("android here");
+        return "Earl is Real";
     }
 
     public function create(Request $request){
@@ -64,19 +64,15 @@ class AndroidController extends Controller
         $surveys = User::find($id)
             ->surveys()->where('published', 1)->where('is_template', 0)->get();
 
-        $survey_pages = array();
-        $page_questions = array();
-        $choices = array();
         foreach ($surveys as $survey){
             $pages = $survey->pages;
-            $survey_pages[] = $pages;
             foreach ($pages as $page){
                 $questions = $page->questions;
-                $page_questions[] = $questions;
                 foreach ($questions as $question){
                     if($question->questionType->has_choices){
-                        $choices[] = $question->choices;
+                        $question->choices;
                     }
+                    $question->rows;
                     $question->option;
                 }
             }
@@ -89,7 +85,8 @@ class AndroidController extends Controller
             "surveys" => $surveys,
             "survey_pages" => [],
             "questions" => [],
-            "choices" => []
+            "choices" => [],
+            "rows" => []
         ));
     }
 
@@ -156,6 +153,12 @@ class AndroidController extends Controller
 
             return 0;
         });
+    }
+
+
+
+    public function downloadSpeech($id){
+        return response()->download(base_path('../public/sounds/speech/question'.$id.'.wav'));
     }
 
 }

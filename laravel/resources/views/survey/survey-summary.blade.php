@@ -54,7 +54,7 @@
                                     <ul>
                                         <li data-filter="date">Filter by Date</li>
                                         <li data-filter="question">Filter by Question Answer</li>
-                                        <li data-filter="user">Filter by User Information</li>
+                                        {{--<li data-filter="user">Filter by User Information</li>--}}
                                     </ul>
                                 </div>
                             </div>
