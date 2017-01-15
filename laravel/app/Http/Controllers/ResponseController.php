@@ -157,7 +157,7 @@ class ResponseController extends Controller
                                         $client = new Client();
 
                                         Log::info("Sentiment Analysis");
-                                        $res = $client->getAsync('https://gateway-a.watsonplatform.net/calls/text/TextGetTextSentiment',
+                                        $res = $client->get('https://gateway-a.watsonplatform.net/calls/text/TextGetTextSentiment',
                                             [
                                                 'query' => [
                                                     'apikey' => config('app.alchemy_key'),
