@@ -145,7 +145,8 @@ foreach ($survey->pages as $page) {
                             <!-- sidebar menu: : style can be found in sidebar.less -->
                             <ul class="nav sidebar-menu">
                                 <li class="text-center no-padding">
-                                    <a href="{{ url('answer/'.$survey->id) }}" style="color: #169ef4;">esurvey/answer/{{ $survey->id }}</a>
+                                    <a href="{{ url('answer/'.$survey->id) }}"
+                                       style="color: #169ef4;">esurvey/answer/{{ $survey->id }}</a>
                                 </li>
                                 <li>
                                     <span class="sidebar-info">Created</span>
@@ -169,30 +170,56 @@ foreach ($survey->pages as $page) {
                                 </li>
                                 <li>
                                     <span class="sidebar-info">Status</span>
-                                    <span class="sidebar-number">{{ $option->open ? "Open" : "Close" }}</span>
+                                    <span class="sidebar-number">
+                                    @if(!empty($option))
+                                            {{ $option->open ? "Open" : "Close" }}
+                                        @else
+                                            Designing Mode
+                                        @endif
+                                    </span>
                                 </li>
                                 <li>
                                     <span class="sidebar-info">Multiple Responses</span>
-                                    <span class="sidebar-number">{{ $option->multiple_responses ? "YES" : "NO" }}</span>
+                                    <span class="sidebar-number">
+                                    @if(!empty($option))
+                                            {{ $option->multiple_responses ? "YES" : "NO" }}
+                                        @else
+                                            -
+                                        @endif
+                                    </span>
                                 </li>
                                 <li>
                                     <span class="sidebar-info">Date Close</span>
-                                    <span class="sidebar-number">{{ $option->data_close == null ? "None" : \Carbon\Carbon::parse($option->data_close)->toFormattedDateString() }}</span>
+                                    <span class="sidebar-number">
+                                    @if(!empty($option))
+                                            {{ $option->data_close == null ? "None" : \Carbon\Carbon::parse($option->data_close)->toFormattedDateString() }}
+                                        @else
+                                            -
+                                        @endif
+                                    </span>
                                 </li>
                                 <li>
                                     <span class="sidebar-info">Responses</span>
-                                    <span class="sidebar-number">{{ $survey->responses->count() }}</span>
+                                    <span class="sidebar-number">{{ $respondents }}</span>
                                 </li>
                                 <li>
                                     <span class="sidebar-info">First Answer</span>
                                     <span class="sidebar-number">
-                                {{ \Carbon\Carbon::parse($survey->responses->sortBy('created_at')->first()->created_at)->toFormattedDateString() }}
+                                         @if($respondents < 1)
+                                            -
+                                        @else
+                                            {{ \Carbon\Carbon::parse($responses->sortBy('created_at')->first()->created_at)->toFormattedDateString() }}
+                                        @endif
                             </span>
                                 </li>
                                 <li>
                                     <span class="sidebar-info">Last Answer</span>
                                     <span class="sidebar-number">
-                                {{ \Carbon\Carbon::parse($survey->responses->sortByDesc('created_at')->first()->created_at)->toFormattedDateString() }}
+                                        @if($respondents < 1)
+                                            -
+                                        @else
+                                            {{ \Carbon\Carbon::parse($responses->sortByDesc('created_at')->first()->created_at)->toFormattedDateString() }}
+                                        @endif
                            </span>
                                 </li>
                             </ul>
@@ -222,11 +249,12 @@ foreach ($survey->pages as $page) {
                             <div class="box-body">
                                 <div class="text-center">
                                     <div class="margin">
-                                        <button class="btn btn-default btn-dashboard">
-                                            <i class="fa fa-eye fa-5x"></i>
+                                        <a href="{{ url('create/'.$survey->id) }}"
+                                           class="btn btn-default btn-dashboard">
+                                            <i class="fa {{ $survey->published ? 'fa-eye' : 'fa-pencil' }} fa-5x"></i>
                                             <br>
-                                            Preview
-                                        </button>
+                                            {{ $survey->published ? 'Preview' : 'Edit' }}
+                                        </a>
                                         <a href="{{ url('share/'.$survey->id) }}"
                                            class="btn btn-facebook btn-dashboard">
                                             <i class="fa fa-share-alt fa-5x"></i>
@@ -234,7 +262,8 @@ foreach ($survey->pages as $page) {
                                             Share
                                         </a>
 
-                                        <a href="{{ url('settings/'.$survey->id) }}" class="btn btn-warning btn-dashboard">
+                                        <a href="{{ url('settings/'.$survey->id) }}"
+                                           class="btn btn-warning btn-dashboard">
                                             <i class="fa fa-wrench fa-5x"></i>
                                             <br>
                                             Settings
@@ -268,11 +297,12 @@ foreach ($survey->pages as $page) {
                                 <div class="box box-primary">
                                     <div class="box-header">
                                         <h3 class="box-title">
-                                            Respondents Compare to All Other Survey
+                                            Response Dates Statistics
                                         </h3>
                                     </div>
                                     <div class="box-body">
-
+                                        <canvas id="dateChart" style="height: 255px; width: 510px;" height="255"
+                                                width="510"></canvas>
                                     </div>
                                 </div>
                             </div>
@@ -280,7 +310,7 @@ foreach ($survey->pages as $page) {
                                 <div class="box box-primary">
                                     <div class="box-header">
                                         <h3 class="box-title">
-                                            Source Platform Statistics
+                                            Respondents Source Platform Statistics
                                         </h3>
                                     </div>
                                     <div class="box-body">
@@ -343,7 +373,7 @@ foreach ($survey->pages as $page) {
 </div>
 
 <!-- jQuery 2.2.3 -->
-<script src="{{ asset('public/plugins/jQuery/jquery-2.2.3.min.js') }}"></script>
+<script src="{{ asset('public/plugins/jquery/jquery-2.2.3.min.js') }}"></script>
 <!-- Bootstrap 3.3.6 -->
 <script src="{{ asset('public/plugins/bootstrap-3.3.7/js/bootstrap.min.js') }}"></script>
 <!-- SlimScroll -->
@@ -382,9 +412,9 @@ foreach ($survey->pages as $page) {
 
 <?php
 $barSources = \Illuminate\Support\Facades\DB::table('responses')
-        ->select('source', 'survey_id', \Illuminate\Support\Facades\DB::raw('count(*) as total'))
-        ->groupBy('survey_id')
-        ->get();
+    ->select('source', 'survey_id', \Illuminate\Support\Facades\DB::raw('count(*) as total'))
+    ->groupBy('survey_id')
+    ->get();
 
 
 //INITIALIZE CHART DATAS
@@ -392,16 +422,16 @@ $colors = ["#f56954", "#00c0ef", "#f39c12", "#00a65a", "#3c8dbc"];
 $pieData = [];
 //$sources = $survey->responses->groupBy('source')->count();
 $sources = \Illuminate\Support\Facades\DB::table('responses')
-        ->select('source', \Illuminate\Support\Facades\DB::raw('count(*) as total'))
-        ->where('survey_id', $survey->id)
-        ->groupBy('source')
-        ->get();
+    ->select('source', \Illuminate\Support\Facades\DB::raw('count(*) as total'))
+    ->where('survey_id', $survey->id)
+    ->groupBy('source')
+    ->get();
 $colorSelector = 0;
 foreach ($sources as $source) {
     $pieData[] = array(
-            "label" => $source->source,
-            "value" => $source->total,
-            "color" => $colors[$colorSelector++]
+        "label" => $source->source,
+        "value" => $source->total,
+        "color" => $colors[$colorSelector++]
     );
 }
 
@@ -449,7 +479,9 @@ foreach ($sources as $source) {
             };
             //Create pie or douhnut chart
             // You can switch between pie and douhnut using the method below.
+            @if($respondents > 0)
             pieChart.Pie(PieData, pieOptions);
+            @endif
         });
     </script>
 

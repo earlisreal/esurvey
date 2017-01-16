@@ -231,6 +231,7 @@ function initializeRemoveFilter() {
                 errorToast();
             },
             complete: function () {
+                initializeRemoveFilter();
                 if(inSummaryTab){
                     initializeCharts();
                 }

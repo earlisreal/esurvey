@@ -1,3 +1,3 @@
 Hi {{ $name }}! Thank you for Being part of eSurvey!
 Please Verify your email by clicking the link below:
-<a href="http://localhost/esurvey/v/{{ $id }}/{{ $code }}">http://localhost/esurvey/v/{{ $id }}/{{ $code }}</a>
+<a href="{{ url('v/'.$id.'/'.$code) }}">{{ url('v/'.$id.'/'.$code) }}</a>

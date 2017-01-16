@@ -522,10 +522,14 @@ class SurveyController extends Controller
             abort(404);
         }
 
+        $responses = $survey->responses;
+
         return view('survey.summary', [
             'survey' => $survey,
             'adminMode' => false,
             'option' => $survey->option,
+            'responses' => $responses,
+            'respondents' => $responses->count()
         ]);
     }
 

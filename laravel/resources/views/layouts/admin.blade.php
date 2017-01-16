@@ -127,7 +127,7 @@
 
 
 <!-- jQuery 2.2.3 -->
-<script src="{{ asset('public/plugins/jQuery/jquery-2.2.3.min.js') }}"></script>
+<script src="{{ asset('public/plugins/jquery/jquery-2.2.3.min.js') }}"></script>
 <!-- Bootstrap 3.3.6 -->
 <script src="{{ asset('public/plugins/bootstrap-3.3.7/js/bootstrap.min.js') }}"></script>
 <!-- SlimScroll -->
