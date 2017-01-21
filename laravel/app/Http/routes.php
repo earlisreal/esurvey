@@ -69,7 +69,7 @@ Route::patch('/create/{id}', 'SurveyController@publish');
 
 Route::get('/share/{id}', 'SurveyController@share');
 
-Route::post('/share/{id}', 'SurveyController@update');
+Route::post('/share/{id}', 'SurveyController@');
 
 /*************************************************************************************************************
  *                                          SETTINGS                                                         *

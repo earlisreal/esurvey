@@ -138,7 +138,9 @@ class AndroidController extends Controller
                 $detail->response()->associate($response);
                 $detail->question()->associate($question);
 
-
+                if($question->questionType->type == "Likert Scale"){
+                    $detail->row_id = $responseDetail['row_id'];
+                }
 
                 if($question->questionType->has_choices){
                     if($responseDetail['choice_id'] != -1){

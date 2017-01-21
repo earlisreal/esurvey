@@ -19,15 +19,28 @@ $no = 1;
     </div>
     <div class="panel-body">
         <form>
+            <?php $prev = -1; ?>
             @foreach($response->responseDetails as $detail)
+                <?php
+                $question = $detail->question;
+                $type = $question->questionType;
+                ?>
                 <div class="row">
                     <div class="form-group">
                         <label class="control-label col-xs-12">
-                            Q{{ $no++ .'. ' .$detail->question->question_title }}
+                            @if($question->id != $prev)
+                                Q{{ $no++ .'. ' .$question->question_title }}
+                            @else
+                                Q{{ ($no - 1 ) .'. ' .$question->question_title }}
+                            @endif
+
+                            @if($type->type == "Likert Scale")
+                                : {{ $detail->row->label }}
+                            @endif
                         </label>
                         <label class="control-label col-xs-12">
                             <h5>
-                                @if($detail->question->questionType->has_choices)
+                                @if($type->has_choices)
 
                                     {!! empty($detail->choice->label) ? '<small>Skipped</small>' : $detail->choice->label !!}
                                 @else
@@ -37,6 +50,9 @@ $no = 1;
                         </label>
                     </div>
                 </div>
+                <?php
+                $prev = $question->id;
+                ?>
             @endforeach
         </form>
     </div>

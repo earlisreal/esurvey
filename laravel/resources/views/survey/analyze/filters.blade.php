@@ -31,16 +31,20 @@
                         @if(!empty($filters['question']))
                             @foreach($filters['question'] as $id => $values)
 
-                                <?php $question = \App\Question::find($id); ?>
+                                <?php
+                                $question = \App\Question::find($id);
+                                $count = 0;
+                                ?>
                                 @if($question->questionType->type == "Likert Scale")
 
                                     @foreach($values as $key => $value)
+                                        <?php $count = 0; ?>
                                         <tr>
                                             <td>
                                                 <b>{{ $question->question_title }}: </b>
                                                 {{ \App\QuestionRow::find($key)->label }} :
                                                 @foreach($value as $choice)
-                                                    {{ \App\QuestionChoice::find($choice)->label }},
+                                                    {{ ($count++ > 0 ? ', ' : '') . \App\QuestionChoice::find($choice)->label }}
                                                 @endforeach
                                             </td>
                                             <td>
@@ -60,7 +64,7 @@
                                         <td>
                                             <b>{{ $question->question_title }}: </b>
                                             @foreach($values as $value)
-                                                {{ $value }},
+                                                {{ ($count++ > 0 ? ', ' : '') . $value }}
                                             @endforeach
                                         </td>
                                         <td>
@@ -75,7 +79,7 @@
                                         <td>
                                             <b>{{ $question->question_title }}: </b>
                                             @foreach($values as $value)
-                                                {{ \App\QuestionChoice::find($value)->label }},
+                                                {{ ($count++ > 0 ? ', ' : '') . \App\QuestionChoice::find($value)->label}}
                                             @endforeach
                                         </td>
                                         <td>

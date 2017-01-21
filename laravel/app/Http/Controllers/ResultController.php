@@ -146,8 +146,10 @@ class ResultController extends Controller
         }
 
         $count = 0;
-        foreach ($filters['question'] as $question){
-            $count += count($question);
+        if(!empty($filters['question'])){
+            foreach ($filters['question'] as $question){
+                $count += count($question);
+            }
         }
         if(!empty($filters['date'])){
             $count++;
@@ -259,7 +261,7 @@ class ResultController extends Controller
 //        Log::info("COUNT -> " . $totalResponse);
 
         foreach ($survey->pages as $page) {
-            foreach ($page->questions as $question) {
+            foreach ($page->questions->sortBy('order_no') as $question) {
                 $standardDeviation = 0;
                 $average = 0;
                 $variance = 0;
