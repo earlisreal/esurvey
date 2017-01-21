@@ -162,7 +162,15 @@ function showChoices(index) {
             break;
         case "Textbox":
         case "Text Area":
-            $('#question-choices').html("<div class='form-group'><input type='text' placeholder='Contains Keyword'></div>");
+            var choices = "";
+            choices += "<div class='checkbox'> " +
+                "<label><input class='choice-checkbox' type='checkbox' value='positive'>Positive</label> </div>";
+            choices += "<div class='checkbox'> " +
+                "<label><input class='choice-checkbox' type='checkbox' value='neutral'>Neutral</label> </div>";
+            choices += "<div class='checkbox'> " +
+                "<label><input class='choice-checkbox' type='checkbox' value='negative'>Negative</label> </div>";
+            // $('#question-choices').html("<div class='form-group'><input type='text' placeholder='Contains Keyword'></div>");
+            $('#question-choices').html(choices);
             break;
     }
 

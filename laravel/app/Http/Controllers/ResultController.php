@@ -101,12 +101,12 @@ class ResultController extends Controller
         if ($key == "question") {
             $questions = Cache::get('question' . $id);
             $question = Question::find($request->id);
-            if($question->questionType->type == "Likert Scale"){
+            if ($question->questionType->type == "Likert Scale") {
                 Log::info("LOG FROM EARL");
                 Log::info($questions[$request->id]);
                 Log::info($questions[$request->id][$request->row]);
                 unset($questions[$request->id][$request->row]);
-            }else{
+            } else {
                 unset($questions[$request->id]);
             }
             Cache::forever('question' . $id, $questions);
@@ -126,12 +126,14 @@ class ResultController extends Controller
 
     private function getFilters($id)
     {
+
+
         $filters = array(
             'date' => [],
             'question' => [],
-            'rows' => array(),
-            'user' => array(),
+            'count' => 0
         );
+
 //        if(Cache::has('question'.$id)){
         $filters['question'] = Cache::get('question' . $id);
 //        }
@@ -142,6 +144,16 @@ class ResultController extends Controller
             $filters['date'] = Cache::get('date' . $id);
             Log::info($filters['date']);
         }
+
+        $count = 0;
+        foreach ($filters['question'] as $question){
+            $count += count($question);
+        }
+        if(!empty($filters['date'])){
+            $count++;
+        }
+
+        $filters['count'] = $count;
 
         return $filters;
     }
@@ -169,30 +181,38 @@ class ResultController extends Controller
                     if (count($questions) > 0) {
                         Log::info("QUESTION READ");
                         Log::info($questions);
-                        $base->where(function ($query) use ($questions){
+                        $base->where(function ($query) use ($questions) {
                             foreach ($questions as $id => $values) {
 
                                 $type = Question::find($id)->questionType->type;
-                                if ($type == "Rating Scale") {
-                                    $query->whereHas('responseDetails', function ($subQuery) use ($id, $values, $type) {
-                                        $subQuery->where('question_id', $id);
-                                        $subQuery->whereIn('text_answer', $values);
-                                    });
-                                } else if ($type == "Likert Scale") {
-                                    foreach ($values as $row => $choices) {
-                                        $query->whereHas('responseDetails', function ($subQuery) use ($row, $choices) {
-                                            $subQuery->where('row_id', $row);
-                                            $subQuery->whereIn('choice_id', $choices);
+                                switch ($type) {
+                                    case "Text Area":
+                                    case "Textbox":
+                                        $query->whereHas('responseDetails', function ($subQuery) use ($id, $values, $type) {
+                                            $subQuery->where('question_id', $id);
+                                            $subQuery->whereIn('sentiment', $values);
                                         });
-                                    }
-                                } else {
-                                    $query->whereHas('responseDetails', function ($subQuery) use ($id, $values, $type) {
-                                        $subQuery->where('question_id', $id);
-                                        $subQuery->whereIn('choice_id', $values);
-                                    });
+                                        break;
+                                    case "Rating Scale":
+                                        $query->whereHas('responseDetails', function ($subQuery) use ($id, $values, $type) {
+                                            $subQuery->where('question_id', $id);
+                                            $subQuery->whereIn('text_answer', $values);
+                                        });
+                                        break;
+                                    case "Likert Scale":
+                                        foreach ($values as $row => $choices) {
+                                            $query->whereHas('responseDetails', function ($subQuery) use ($row, $choices) {
+                                                $subQuery->where('row_id', $row);
+                                                $subQuery->whereIn('choice_id', $choices);
+                                            });
+                                        }
+                                        break;
+                                    default:
+                                        $query->whereHas('responseDetails', function ($subQuery) use ($id, $values, $type) {
+                                            $subQuery->where('question_id', $id);
+                                            $subQuery->whereIn('choice_id', $values);
+                                        });
                                 }
-
-
                             }
                         });
                     }

@@ -1,4 +1,4 @@
-@if(!empty($filters['date']) || !empty($filters['question']))
+@if($filters['count'] > 0)
     <div class="row no-print">
         <div class="col-xs-5">
             <div class="panel panel-primary">
@@ -38,20 +38,38 @@
                                         <tr>
                                             <td>
                                                 <b>{{ $question->question_title }}: </b>
-                                                    {{ \App\QuestionRow::find($key)->label }} :
-                                                    @foreach($value as $choice)
-                                                        {{ \App\QuestionChoice::find($choice)->label }},
-                                                    @endforeach
+                                                {{ \App\QuestionRow::find($key)->label }} :
+                                                @foreach($value as $choice)
+                                                    {{ \App\QuestionChoice::find($choice)->label }},
+                                                @endforeach
                                             </td>
                                             <td>
                                                 <button type="button" class="close remove-filter" data-toggle="tooltip"
                                                         title="Remove Filter" data-id="{{ $id }}" data-row="{{ $key }}"
-                                                        data-key="question" data-dismiss="modal" aria-label="Close"><span
+                                                        data-key="question" data-dismiss="modal"
+                                                        aria-label="Close"><span
                                                             aria-hidden="true">&times;</span></button>
                                             </td>
                                         </tr>
 
                                     @endforeach
+                                @elseif($question->questionType->type == "Text Area" ||
+                                 $question->questionType->type == "Textbox" ||
+                                 $question->questionType->type == "Rating Scale")
+                                    <tr>
+                                        <td>
+                                            <b>{{ $question->question_title }}: </b>
+                                            @foreach($values as $value)
+                                                {{ $value }},
+                                            @endforeach
+                                        </td>
+                                        <td>
+                                            <button type="button" class="close remove-filter" data-toggle="tooltip"
+                                                    title="Remove Filter" data-id="{{ $question->id }}"
+                                                    data-key="question" data-dismiss="modal" aria-label="Close"><span
+                                                        aria-hidden="true">&times;</span></button>
+                                        </td>
+                                    </tr>
                                 @else
                                     <tr>
                                         <td>

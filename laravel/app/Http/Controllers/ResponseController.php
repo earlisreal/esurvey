@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests;
+use App\Jobs\AnalyzeText;
 use App\Response;
 use App\ResponseDetail;
 use App\Survey;
@@ -152,30 +153,14 @@ class ResponseController extends Controller
 
                                 if (!empty($text)) {
                                     $detail->text_answer = $text;
-
-                                    if ($type == "Textbox" || $type == "Text Area") {
-                                        $client = new Client();
-
-                                        Log::info("Sentiment Analysis");
-                                        $res = $client->get('https://gateway-a.watsonplatform.net/calls/text/TextGetTextSentiment',
-                                            [
-                                                'query' => [
-                                                    'apikey' => config('app.alchemy_key'),
-                                                    'text' => $text,
-                                                    'outputMode' => 'json'
-                                                ]
-                                            ]);
-//                                    Log::info($res->getBody());
-                                        $analysis = json_decode($res->getBody());
-                                        Log::info("Status -> " . $analysis->status);
-                                        if($res->getStatusCode() == 200){
-                                            $detail->sentiment = $analysis->docSentiment->type;
-                                        }
-                                    }
                                 }
                             }
 
                             $detail->save();
+
+                            if ($type == "Textbox" || $type == "Text Area") {
+                                $this->dispatch(new AnalyzeText($detail));
+                            }
                     }
 
                 }
