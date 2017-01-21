@@ -1,5 +1,5 @@
 @if(!empty($filters['date']) || !empty($filters['question']))
-    <div class="row">
+    <div class="row no-print">
         <div class="col-xs-5">
             <div class="panel panel-primary">
                 <div class="panel-heading">

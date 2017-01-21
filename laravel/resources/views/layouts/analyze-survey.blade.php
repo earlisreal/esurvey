@@ -31,7 +31,7 @@
 
 @section('content')
 
-    <ul class="nav nav-tabs">
+    <ul class="nav nav-tabs no-print">
         <li role="presentation" class="{{ Request::is('analyze/'.$survey->id.'/summary') ? 'active' : '' }}"><a href="{{ url('/analyze/' .$survey->id .'/summary') }}"
                                                   aria-controls="home" role="tab"><i class="fa fa-pie-chart"></i>
                 Summary</a></li>
@@ -42,7 +42,7 @@
         <div role="tabpanel" class="tab-pane active">
             <div class="col-xs-12">
                 {{--<h4>Earl is Real</h4>--}}
-                <div class="row">
+                <div class="row no-print">
                     <div class="form-group col-xs-3">
                         <label for="filter-btn" class="control-label">Add Filter:</label>
                         <div class="input-group">

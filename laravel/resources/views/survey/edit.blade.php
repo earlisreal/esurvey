@@ -16,20 +16,6 @@
 
     </section>
 
-    @if(!$survey->published)
-        <section class="content-header">
-            <div class="pull-right">
-                <form method="POST" action="{{ url('/create/'.$survey->id) }}" class="publish-form">
-                    {{ csrf_field() }}
-                    {{ method_field('PATCH') }}
-                    <button type="button" id="publish-survey" class="btn btn-lg btn-primary"><i
-                                class="fa fa-btn fa-share"></i>Publish Template
-                    </button>
-                </form>
-            </div>
-        </section>
-    @endif
-
 @endsection
 
 @else
@@ -62,8 +48,6 @@
 @endsection
 
 @section('content')
-
-
     @if(!$survey->published)
         <div class="pull-right">
             <form method="POST" action="{{ url('/create/'.$survey->id) }}" class="publish-form">
@@ -85,8 +69,6 @@
     @include('modals.moveCopy')
 
     <input type="hidden" id="selected-page-id" value="0">
-
-
 
     @if(!$adminMode)
         <div class="">

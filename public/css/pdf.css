@@ -1,7 +1,11 @@
-.donut-holder, table tr{
+.chart-holder, table tr{
     page-break-inside: avoid;
 }
 
 .data-chart {
     page-break-inside: avoid;
+}
+
+.no-print {
+    display: none;
 }

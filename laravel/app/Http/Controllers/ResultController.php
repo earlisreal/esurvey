@@ -52,36 +52,6 @@ class ResultController extends Controller
             return view('misc.publish-first', ['survey' => $survey]);
     }
 
-    public function summary($id, Request $request)
-    {
-//        Cache::flush();
-        $survey = Survey::findOrFail($id);
-
-        if (Gate::denies('manipulate-survey', $survey)) {
-            abort(404);
-        }
-
-        if (!$survey->published) {
-            return view('misc.publish-first', ['survey' => $survey]);
-        }
-
-        if ($survey->responses->count() < 1) { //Display no Response Message
-            return view('misc.message', [
-                'survey' => $survey
-            ]);
-        }
-
-        $datas = $this->getResults($survey);
-
-        return view('survey.analyze.analyze-summary', [
-            'survey' => $survey,
-            'results' => $datas['results'],
-            'totalResponse' => $datas['totalResponse'],
-            'responseCount' => $datas['responseCount'],
-            'filters' => $datas['filters']
-        ]);
-    }
-
     public function addFilter($id, Request $request)
     {
         $survey = Survey::findOrFail($id);
@@ -398,6 +368,37 @@ class ResultController extends Controller
         );
     }
 
+
+    public function summary($id, Request $request)
+    {
+//        Cache::flush();
+        $survey = Survey::findOrFail($id);
+
+        if (Gate::denies('manipulate-survey', $survey)) {
+            abort(404);
+        }
+
+        if (!$survey->published) {
+            return view('misc.publish-first', ['survey' => $survey]);
+        }
+
+        if ($survey->responses->count() < 1) { //Display no Response Message
+            return view('misc.message', [
+                'survey' => $survey
+            ]);
+        }
+
+        $datas = $this->getResults($survey);
+
+        return view('survey.analyze.analyze-summary', [
+            'survey' => $survey,
+            'results' => $datas['results'],
+            'totalResponse' => $datas['totalResponse'],
+            'responseCount' => $datas['responseCount'],
+            'filters' => $datas['filters']
+        ]);
+    }
+
     public function user($id)
     {
         $survey = Survey::findOrFail($id);
@@ -420,36 +421,18 @@ class ResultController extends Controller
         ]);
     }
 
-    public function generatePdf($id)
+    public function generatePdf($id, Request $request)
     {
-        $survey = Survey::find($id);
-        $filtered = false;
-        $totalResponse = $survey->responses()->count();
-        $start = "";
-        $end = "";
-        if (!empty($_GET['start']) && !empty($_GET['end'])) {
-            $filtered = true;
-            $start = $_GET['start'];
-            $end = $_GET['end'];
-
-            $totalResponse = $survey
-                ->responses()
-                ->where('created_at', '>=', $start)
-                ->where('created_at', '<=', $end . ' 23:59:59')
-                ->count();
-            //            ->whereBetween('created_at', array($start, $end))->count();
-        }
-
+        $survey = Survey::findOrFail($id);
+        $datas = $this->getResults($survey);
 
         $pdf = PDF::loadView('pdf.analyzeSummary', [
+            'user' => $request->user(),
             'survey' => $survey,
-            'colors' => $this->colors,
-            'user' => Auth::user(),
-            'filtered' => $filtered,
-            'totalResponse' => $totalResponse,
-            'responseDetails' => ResponseDetail::all(),
-            'start' => $start,
-            'end' => $end,
+            'results' => $datas['results'],
+            'totalResponse' => $datas['totalResponse'],
+            'responseCount' => $datas['responseCount'],
+            'filters' => $datas['filters']
         ]);
         return $pdf->inline('result.pdf');
     }

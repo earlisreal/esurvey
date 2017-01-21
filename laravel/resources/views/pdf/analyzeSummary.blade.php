@@ -13,7 +13,6 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:100,300,400,700">
 
 
-
     <!-- Miscs -->
     <!-- Ionicons -->
     <link rel="stylesheet" href="{{ asset('public/plugins/ionicons-2.0.1/css/ionicons.min.css') }}">
@@ -27,7 +26,6 @@
     <link rel="stylesheet" href="{{ asset('public/plugins/iCheck/all.css') }}">
     <!-- DateRange Picker -->
     <link rel="stylesheet" href="{{ asset('public/plugins/daterangepicker/daterangepicker.css') }}">
-
 
 
     <!-- Styles -->
@@ -60,216 +58,174 @@
     <div class="col-xs-2">
         <img src="{{ asset('public/images/logo.png') }}" height="120px">
     </div>
-    <div class="col-xs-10">
+    <div class="col-xs-8">
         <h1 class="text-center" style="margin-bottom: 0px;">
             <b>eSurvey</b>
         </h1>
         <h2 class="text-center" style="margin-top: 0px;margin-bottom: 0px">
-            {{ $user->first_name ." " .$user->last_name .": " . $survey->survey_title }}
+            Survey Title: {{ $survey->survey_title }}
         </h2>
         <h3 class="text-center" style="margin-top: 0px;">
-            Summary of {{ $survey->responses->count() }} Total Responses From
-            {{ \Carbon\Carbon::parse($survey->responses()->orderBy('created_at')->first()->created_at)->toFormattedDateString() }}
-            To
-            {{ \Carbon\Carbon::parse($survey->responses()->orderBy('created_at', 'desc')->first()->created_at)->toFormattedDateString() }}
+            Created by: {{ $user->first_name ." " .$user->last_name }}
         </h3>
     </div>
 </div>
 
 <hr>
 
+
 @if($totalResponse > 0)
     <?php
     $questionNo = 1;
-    $averages = array();
-    $donutChart = array();
     ?>
-    @foreach($survey->pages()->orderBy('page_no')->get() as $page)
-        {{--Page {{ $page->page_no }}--}}
-        @foreach($page->questions()->orderBy('order_no', 'asc')->get() as $question)
-            @if($question->questionType->has_choices || $question->questionType->type == "Rating Scale")
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <h3><b> Q{{ $questionNo }}  </b> {{ $question->question_title }}</h3>
-                    </div>
-                    <div class="panel-body">
-                        <div id="donut-holder" class="data-chart">
-                            <div id="donut-chart{{ $questionNo }}" style="height: 300px; width: 800px"></div>
-                            <label id="donut-data{{ $questionNo++ }}"
-                                   style="position: relative; bottom: 200px; left: 47.25%;"></label>
-                        </div>
 
-                        <table class="table table-bordered">
-                            <?php
-                            $donutItem = [];
-                            $colorSelector = 0;
-                            $total = 0;
-                            if($filtered) {
-                                $responseNumber = DB::table('surveys')
-                                        ->join('responses', 'surveys.id', '=', 'responses.survey_id')
-                                        ->join('response_details', 'responses.id', '=', 'response_details.response_id')
-                                        ->where('question_id', $question->id)
-                                        ->where('responses.created_at', '>=', $start)
-                                        ->where('responses.created_at', '<=', $end.' 23:59:59')
-                                        ->count();
-                            }else{
-                                $responseNumber = DB::table('surveys')
-                                        ->join('responses', 'surveys.id', '=', 'responses.survey_id')
-                                        ->join('response_details', 'responses.id', '=', 'response_details.response_id')
-                                        ->where('question_id', $question->id)
-                                        ->count();
-                            }
+    @if(!empty($filters['date']) || !empty($filters['question']))
+        <div class="row">
+            <div class="col-xs-5">
+                <h4>Filters:</h4>
+                @if(!empty($filters['date']))
+                    <h5>
+                        <b>Date: </b>
+                        {{ $filters['date']['start'] }} to {{ $filters['date']['end'] }}
+                    </h5>
+                @endif
+                @if(!empty($filters['question']))
+                    @foreach($filters['question'] as $id => $values)
 
-                            ?>
-                            Out of {{ $totalResponse }} responses - {{ $responseNumber }} answered,
-                            {{ $totalResponse - $responseNumber }} skipped
-                            @if($question->questionType->type == "Rating Scale")
-                                <?php
-                                $max_rate = $question->option->max_rating ;
-                                $average = number_format($responseDetails
-                                        ->where('question_id' , $question->id)->avg('text_answer'),
-                                        2, '.', ',');
-                                $variance = 0;
-                                ?>
-                                <thead>
-                                <tr>
-                                    <th>Rate</th>
-                                    <th>Responses</th>
-                                    <th>Percent</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                @for($i=3; $i <= $max_rate; $i++)
-                                    <tr>
-                                        <td>{{ $i }}</td>
-                                        <td>
-                                            <?php
-                                            if($filtered){
-                                                $count = $question
-                                                        ->responses()
-                                                        ->where('text_answer', $i)
-                                                        ->where('created_at', '>=', $start)
-                                                        ->where('created_at', '<=', $end.' 23:59:59')
-                                                        ->groupBy('text_answer')
-                                                        ->count();
-                                            } else{
-                                                $count = $question
-                                                        ->responses()
-                                                        ->where('text_answer', $i)
-                                                        ->groupBy('text_answer')
-                                                        ->count();
-                                            }
-                                            ?>
-                                            {{ $count }}
-                                        </td>
-                                        <td>{{ number_format($count/$responseNumber*100, 2, '.', ',') }}%</td>
-                                    </tr>
-                                    <?php
-                                    $donutItem[] = array(
-                                            "label" => $i,
-                                            "data" => $count,
-                                            "color" => $colors[$colorSelector++]
-                                    );
+                        <?php $question = \App\Question::find($id); ?>
+                        @if($question->questionType->type == "Likert Scale")
 
-                                    $variance += $count * pow(($i - $average), 2);
-                                    ?>
-                                @endfor
+                            @foreach($values as $key => $value)
+                                <h5>
+                                    <b>{{ $question->question_title }}: </b>
+                                    {{ \App\QuestionRow::find($key)->label }} :
+                                    @foreach($value as $choice)
+                                        {{ \App\QuestionChoice::find($choice)->label }},
+                                    @endforeach
+                                </h5>
 
-                                <tr>
-                                    <th>Total</th>
-                                    <td><b>{{ $responseNumber }}</b></td>
-                                    <td><b>100%</b></td>
-                                </tr>
-                                <tr>
-                                    <th>Average</th>
-                                    <td>
-                                        <b>
-                                            {{ $average }}
-                                        </b>
-                                    </td>
-                                    {{--<td><b>{{ $total/$responseNumber/$max_rate*100 }}%</b></td>--}}
-                                </tr>
-                                <td colspan="3">
-                                    Standard Deviation of <b>{{ number_format(sqrt($variance/($responseNumber)), 2, '.', ',') }}</b>
-                                    - A standard deviation of small value means that the values, in a distribution are scattered or spread out near the mean and vice versa.
-                                </td>
-                                </tr>
-                                </tbody>
-                            @else
-                                <thead>
-                                <tr>
-                                    <th>Choice</th>
-                                    <th>Response</th>
-                                    <th>Percent</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                @foreach($question->choices as $choice)
-                                    <tr>
-                                        <td>{{ $choice->label }}</td>
-                                        <td>
-                                            <?php
-                                            if($filtered){
-                                                $count = DB::table('surveys')
-                                                        ->join('responses', 'surveys.id', '=', 'responses.survey_id')
-                                                        ->join('response_details', 'responses.id', '=', 'response_details.response_id')
-                                                        ->where('question_id', $question->id)
-                                                        ->where('choice_id', $choice->id)
-                                                        ->where('responses.created_at', '>=', $start)
-                                                        ->where('responses.created_at', '<=', $end.' 23:59:59')
-                                                        ->groupBy('choice_id')
-                                                        ->count();
-                                            }else{
-                                                $count = DB::table('surveys')
-                                                        ->join('responses', 'surveys.id', '=', 'responses.survey_id')
-                                                        ->join('response_details', 'responses.id', '=', 'response_details.response_id')
-                                                        ->where('question_id', $question->id)
-                                                        ->where('choice_id', $choice->id)
-                                                        ->groupBy('choice_id')
-                                                        ->count();
-                                            }
-
-                                            echo $count;
-                                            ?>
-                                        </td>
-                                        <td>{{ number_format($count/$responseNumber*100, 2, '.', ',') }}%</td>
-                                    </tr>
-
-
-                                    {{--INITIALIZE JAVA SCRIPT FOR CHART--}}
-                                    <?php
-                                    $donutItem[] = array(
-                                            "label" => str_limit($choice->label, 12),
-                                            "data" => $count,
-                                            "color" => $colors[$colorSelector++]
-                                    );
-                                    ?>
+                            @endforeach
+                        @else
+                            <h5>
+                                <b>{{ $question->question_title }}: </b>
+                                @foreach($values as $value)
+                                    {{ \App\QuestionChoice::find($value)->label }},
                                 @endforeach
-                                <tr>
-                                    <th>Total</th>
-                                    <td><b>{{ $responseNumber }}</b></td>
-                                    <td><b>100%</b></td>
-                                </tr>
-                                <tr>
-                                </tbody>
-                            @endif
-                            <?php $donutChart[] = $donutItem; ?>
-                        </table>
+                            </h5>
+                        @endif
+
+                    @endforeach
+                @endif
+            </div>
+        </div>
+    @endif
+
+    <h3>Respondents: {{ $totalResponse }} of {{ $responseCount }}</h3>
+
+    @foreach($results as $result)
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3><b> Q{{ $questionNo }}  </b> {{ $result['questionTitle'] }}</h3>
+            </div>
+            <div class="panel-body">
+
+                @if($result['type'] == "Likert Scale")
+                    <?php $grid = $result['grid'] ?>
+                    <div class="data-chart" id="chart{{ $questionNo }}" style="height: 300px;  width: 900px"></div>
+                    <table class="table">
+                        Out of {{ $totalResponse }} responses - {{ $result['respondents'] }}
+                        answered,
+                        {{ $totalResponse - $result['respondents'] }} skipped
+                        <thead>
+                        <tr>
+                            <th></th>
+                            @foreach($grid['headers'] as $header)
+                                <th>{{ $header['label'] }}</th>
+                            @endforeach
+                            <th>Total</th>
+                            <th>Average</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        @foreach($grid['rows'] as $row)
+                            <tr>
+                                <th>{{ $row['label'] }}</th>
+                                @foreach($row['cols'] as $col)
+                                    <td>{{ $col }}</td>
+                                @endforeach
+                                <td><b>{{ $row['total'] }}</b></td>
+                                <td><b>{{ $row['average'] }}</b></td>
+                            </tr>
+                        @endforeach
+                        </tbody>
+                    </table>
+                @else
+                    <div id="chart-holder" class="data-chart">
+                        <div id="chart{{ $questionNo }}" style="height: 300px; width: 900px"></div>
+                        <label id="chart-data{{ $questionNo }}"
+                               style="position: relative; bottom: 200px; left: 47.25%;"></label>
                     </div>
-                </div>
-            @endif
-        @endforeach
+                    <table class="table table-bordered datatable">
+                        Out of {{ $totalResponse }} responses - {{ $result['respondents'] }}
+                        answered,
+                        {{ $totalResponse - $result['respondents'] }} skipped
+
+                        <thead>
+                        <tr>
+                            <th>Choice Label</th>
+                            <th>Responses</th>
+                            <th>Percentage</th>
+                        </tr>
+                        </thead>
+                        @foreach($result['datas'] as $data)
+                            <tr>
+                                <td>{{ $data['label'] }}</td>
+                                <td>{{ $data['data'] }}</td>
+                                <td>{{ $result['total'] > 0 ? number_format($data['data'] / $result['total'] * 100, 2, '.', ',') : 0 }}
+                                    %
+                                </td>
+                            </tr>
+                        @endforeach
+                        <tfoot>
+                        <tr>
+                            <th>Total</th>
+                            <th>{{ $result['total'] }}</th>
+                            <th>{{ $result['total'] > 0 ? 100 : 0 }}%</th>
+                        </tr>
+                        @if($result['type'] == "Rating Scale")
+                            <tr>
+                                <th>Average</th>
+                                <td colspan="2">{{ $result['average'] }}</td>
+                            </tr>
+                            <tr>
+                                <td colspan="3">
+                                    Standard Deviation of
+                                    <b>{{ $result['standardDeviation'] }}</b>
+                                    - A standard deviation of small value means that the values, in
+                                    a distribution are scattered or spread out near the mean and
+                                    vice versa.
+                                </td>
+                            </tr>
+                        @endif
+                        </tfoot>
+                    </table>
+                @endif
+            </div>
+        </div>
+        <?php $questionNo++ ?>
     @endforeach
 @else
     <div class="panel panel-default">
         <div class="panel-heading">
-            <h3>No Responses for this Date</h3>
+            <h3>No Responses Found</h3>
         </div>
     </div>
 @endif
 
+Date Printed: {{ \Carbon\Carbon::now()->toDateTimeString() }}
+
 <!-- jQuery 2.2.3 -->
-<script src="{{ asset('public/plugins/jQuery/jquery-2.2.3.min.js') }}"></script>
+<script src="{{ asset('public/plugins/jquery/jquery-2.2.3.min.js') }}"></script>
 <!-- Bootstrap 3.3.6 -->
 <script src="{{ asset('public/plugins/bootstrap-3.3.7/js/bootstrap.min.js') }}"></script>
 <!-- SlimScroll -->
@@ -291,56 +247,8 @@
 <!-- FLOT CATEGORIES PLUGIN - Used to draw bar charts -->
 <script src="{{ asset('public/plugins/flot/jquery.flot.categories.min.js') }}"></script>
 
-<!-- Page script -->
-@if($totalResponse > 0)
-    <script>
-        $(function () {
-            var datas = <?php echo json_encode($donutChart) ?>;
-            var averages = {{ json_encode($averages) }}
-            //            console.log(averages);
-            //            console.log(datas);
-            for(i=1; i <= {{ $questionNo-1 }}; i++) {
-//                    console.log(datas[i-1]);
-//                $("#donut-data"+i).html("<h3 class='text-center'>" +averages[i-1] +"</h3><h4>Average</h4>");
-                $.plot("#donut-chart"+i, datas[i-1], {
-                    series: {
-                        pie: {
-                            innerRadius: 0.5,
-                            show: true,
-                            radius: 1,
-                            label: {
-                                show: true,
-                                radius: 1,
-                                formatter: labelFormatter,
-                                background: {
-                                    opacity: 0.5,
-                                    color: '#000'
-                                }
-                            }
-                        }
-                    },
-                    legend: {
-                        show: true
-                    }
-                });
-            }
-        });
-
-        function labelFormatter(label, series) {
-            return '<div style="font-size:13px; text-align:center; padding:2px; color: #fff; font-weight: 600;">'
-                    + label
-                    + "<br>"
-                    + series.percent.toFixed(2) + "%</div>";
-        }
-
-
-    </script>
-
-@endif
-
 <script>
-
-    var minDate = '{{ $survey->responses()->orderBy('created_at')->first()->created_at }}';
+    var results = <?php echo json_encode($results) ?>;
 </script>
 
 <!-- SCRIPT -->
