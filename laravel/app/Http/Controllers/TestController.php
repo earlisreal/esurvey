@@ -19,12 +19,15 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Log;
 use Psr\Http\Message\ResponseInterface;
+use RobbieP\CloudConvertLaravel\Facades\CloudConvert;
 
 class TestController extends Controller
 {
     public function test(Request $request)
     {
-        return view('test');
+//        $wav = Storage::disk('sound')->get('speech/question10.wav');
+        CloudConvert::file(asset('public/sounds/speech/wav/question10.wav'))
+            ->to(public_path('../public/sounds/speech/mp3/cloudtest.mp3'));
     }
 
     public function voice(Request $request)

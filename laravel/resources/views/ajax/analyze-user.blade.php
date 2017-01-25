@@ -8,6 +8,7 @@
             <th>Date Time</th>
             <th>Source</th>
             <th>IP</th>
+            <th>User</th>
             <th>Gender</th>
             <th>Age</th>
             <th>Contact</th>
@@ -25,11 +26,13 @@
                 <td>{{ $response->source }}</td>
                 <td>{{ $response->source_ip }}</td>
                 @if($user != null)
+                    <td>{{ $user->username }}</td>
                     <td>{{ $user->gender }}</td>
                     <td>{{ \Carbon\Carbon::parse($user->birthday)->age }}</td>
                     <td>{{ $user->phone }}</td>
                     <td>{{ $user->state .', ' .$user->country }}</td>
                 @else
+                    <td>-</td>
                     <td>-</td>
                     <td>-</td>
                     <td>-</td>

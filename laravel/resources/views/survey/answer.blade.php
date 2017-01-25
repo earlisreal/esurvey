@@ -54,7 +54,7 @@
                                         ?>
                                         <div class="row">
                                             <audio id="voice{{$question->id}}"
-                                                   src="{{ asset('public/sounds/speech/question' .$question->id .'.wav') }}"></audio>
+                                                   src="{{ asset('public/sounds/speech/wav/question' .$question->id .'.wav') }}"></audio>
                                             <div class="col-xs-12">
                                                 <div class="form-group">
                                                     <label for="{{ $question->id }}">

@@ -160,7 +160,7 @@ class AndroidController extends Controller
 
 
     public function downloadSpeech($id){
-        return response()->download(base_path('../public/sounds/speech/question'.$id.'.wav'));
+        return response()->download(base_path('../public/sounds/speech/mp3/question'.$id.'.mp3'));
     }
 
 }

@@ -17,6 +17,8 @@ return [
 
     'tts_password' => env('KEY_TTS_PASSWORD', 'get your Api key at IBM watsons'),
 
+    'cloudconvert_key' => env('KEY_CLOUDCONVERT', 'get Api key at https://cloudconvert.com/'),
+
 
     /*
     |--------------------------------------------------------------------------
@@ -140,6 +142,8 @@ return [
     */
 
     'providers' => [
+        //Cloud Convert
+        RobbieP\CloudConvertLaravel\CloudConvertLaravelServiceProvider::class,
 
         //DINGO
         Dingo\Api\Provider\LaravelServiceProvider::class,

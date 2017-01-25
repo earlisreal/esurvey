@@ -73,6 +73,8 @@ class ResponseController extends Controller
                     'message' => $survey->option->closed_message
                 ]);
             }
+        }else{
+            abort(404);
         }
     }
 
@@ -106,9 +108,9 @@ class ResponseController extends Controller
             $response->survey()->associate($survey);
             $response->source = $agent->platform();
             $response->source_ip = $request->ip();
-            if ($survey->option->register_required) {
+//            if ($survey->option->register_required) {
                 $response->user()->associate(Auth::user());
-            }
+//            }
             $response->save();
 
             foreach ($survey->pages as $page) {
@@ -158,7 +160,7 @@ class ResponseController extends Controller
 
                             $detail->save();
 
-                            if ($type == "Textbox" || $type == "Text Area") {
+                            if ($type == "Text Area") {
                                 $this->dispatch(new AnalyzeText($detail));
                             }
                     }

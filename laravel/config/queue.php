@@ -64,6 +64,14 @@ return [
             'expire' => 90,
         ],
 
+        'iron' => array(
+            'driver'  => 'iron',
+            'host'    => 'worker-aws-us-east-1.iron.io',
+            'project' => '58830caf217681000720132a',
+            'token'   => 'zcuQvsaJg0oBadpu1Da3',
+            'queue'   => 'laravel',
+        ),
+
     ],
 
     /*

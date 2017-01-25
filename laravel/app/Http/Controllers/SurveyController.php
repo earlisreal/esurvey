@@ -496,7 +496,11 @@ class SurveyController extends Controller
             ]);
         });
 
-        $this->dispatch(new SaveQuestionSpeech($survey));
+        foreach ($survey->pages as $page){
+            foreach ($page->questions as $question){
+                $this->dispatch(new SaveQuestionSpeech($question));
+            }
+        }
 
         if ($survey->is_template) {
             return redirect('admin/templates');
