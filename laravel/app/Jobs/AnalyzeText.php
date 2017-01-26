@@ -46,11 +46,8 @@ class AnalyzeText extends Job implements ShouldQueue
             ]);
         Log::info($res->getBody());
         $analysis = json_decode($res->getBody());
-//        Log::info("Status -> " . $analysis->status);
+        Log::info("Status -> " . $analysis->status);
         if($res->getStatusCode() == 200){
-            Log::info($analysis);
-            //TODO
-            //if status == OK
             if($analysis->status == "OK"){
                 $this->detail->update([
                     'sentiment' => $analysis->docSentiment->type

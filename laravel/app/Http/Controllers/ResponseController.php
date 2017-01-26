@@ -160,7 +160,7 @@ class ResponseController extends Controller
 
                             $detail->save();
 
-                            if ($type == "Text Area") {
+                            if ($type == "Textbox" || $type == "Text Area") {
                                 $this->dispatch(new AnalyzeText($detail));
                             }
                     }

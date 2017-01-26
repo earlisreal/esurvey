@@ -27,6 +27,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\View;
 use Log;
 use Gate;
+use PhpParser\Node\Expr\BinaryOp\LogicalAnd;
 use Psr\Http\Message\ResponseInterface;
 
 class SurveyController extends Controller
@@ -528,12 +529,34 @@ class SurveyController extends Controller
 
         $responses = $survey->responses;
 
+        $barLabel = DB::table('responses')
+            ->select(DB::raw('count(*) as data, DATE(created_at) label'))
+            ->groupBy('label')
+            ->take(7)
+            ->orderBy('label', 'desc')
+            ->pluck('label');
+
+        for ($i = 0; $i < count($barLabel); $i++){
+            $barLabel[$i] = Carbon::parse($barLabel[$i])->format('M d');
+        }
+
+        $barData = DB::table('responses')
+            ->select(DB::raw('count(*) as data, DATE(created_at) label'))
+            ->groupBy('label')
+            ->take(7)
+            ->orderBy('label', 'desc')
+            ->pluck('data');
+
+//        Log::info($test);
+
         return view('survey.summary', [
             'survey' => $survey,
             'adminMode' => false,
             'option' => $survey->option,
             'responses' => $responses,
-            'respondents' => $responses->count()
+            'respondents' => $responses->count(),
+            'barLabels' => $barLabel,
+            'barDatas' => $barData
         ]);
     }
 
