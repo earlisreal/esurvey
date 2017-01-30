@@ -531,6 +531,7 @@ class SurveyController extends Controller
 
         $barLabel = DB::table('responses')
             ->select(DB::raw('count(*) as data, DATE(created_at) label'))
+            ->where('survey_id', $survey->id)
             ->groupBy('label')
             ->take(7)
             ->orderBy('label', 'desc')

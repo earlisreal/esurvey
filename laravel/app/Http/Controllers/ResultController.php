@@ -446,6 +446,21 @@ class ResultController extends Controller
     public function generatePdf($id, Request $request)
     {
         $survey = Survey::findOrFail($id);
+
+        if (Gate::denies('manipulate-survey', $survey)) {
+            abort(404);
+        }
+
+        if (!$survey->published) {
+            return view('misc.publish-first', ['survey' => $survey]);
+        }
+
+        if ($survey->responses->count() < 1) { //Display no Response Message
+            return view('misc.message', [
+                'survey' => $survey
+            ]);
+        }
+
         $datas = $this->getResults($survey);
 
         $pdf = PDF::loadView('pdf.analyzeSummary', [

@@ -170,7 +170,7 @@
                                 <li  class="{{ Request::is('analyze/'.$survey->id.'/user') ? 'active' : '' }}"><a href="{{ url('analyze/'.$survey->id.'/user') }}"><i class="fa fa-users"></i> Individual Responses</a></li>
                             </ul>
                         </li>
-                        <li><a href="{{ url('analyze/'.$survey->id.'/result.pdf') }}" target="_blank"><i class="fa fa-file-pdf-o"></i> Quick Report</a></li>
+                        <li class="{{ Request::is('analyze/'.$survey->id.'/result.pdf') ? 'active' : '' }}"><a href="{{ url('analyze/'.$survey->id.'/result.pdf') }}" target="_blank"><i class="fa fa-file-pdf-o"></i> Quick Report</a></li>
                         <li class="treeview">
                             <a href="">
                                 <i class="fa fa-gears"></i>

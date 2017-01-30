@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.app-with-sidebar')
 
 @section('header')
     @include('common.header')
@@ -23,5 +23,9 @@
 @endsection
 
 @section('content')
-    <h3 class="text-center">This Survey is not yet published. <a href="{{ url('create/'.$survey->id) }}">Publish</a> your Survey to start sharing and collect responses</h3>
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="text-center">This Survey is not yet published. <a href="{{ url('create/'.$survey->id) }}">Publish</a> your Survey to start sharing and collect responses</h3>
+        </div>
+    </div>
 @endsection

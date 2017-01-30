@@ -23,5 +23,10 @@
 @endsection
 
 @section('content')
-    <h3 class="text-center">There are no responses. <a href="{{ url('share/'.$survey->id) }}">Share</a> your Survey to collect responses</h3>
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="text-center">There are no responses. <a href="{{ url('share/'.$survey->id) }}">Share</a> your
+                Survey to collect responses</h3>
+        </div>
+    </div>
 @endsection
