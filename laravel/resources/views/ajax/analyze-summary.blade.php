@@ -7,7 +7,7 @@
     @foreach($results as $result)
         <div class="panel panel-default">
             <div class="panel-heading">
-                <h3><b> Q{{ $questionNo }}  </b> {{ $result['questionTitle'] }}</h3>
+                <h3><b> {{ $questionNo }}.  </b> {{ $result['questionTitle'] }}</h3>
             </div>
             <div class="panel-body">
 

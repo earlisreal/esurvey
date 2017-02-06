@@ -272,6 +272,9 @@ class ResultController extends Controller
                 $rows = [];
                 $headers = [];
                 $datas = [];
+                if($type == "Textbox"){
+                    continue;
+                }
                 switch ($type) {
                     case "Checkbox":
                     case "Multiple Choice":
