@@ -4,6 +4,7 @@
 var questionRowIsClicked = false;
 var selectedChoiceType;
 var choiceCount = 2;
+var questionRowCount = 2;
 
 $(function () {
     console.log("test rearl");
@@ -85,8 +86,14 @@ function setupNewQuestion(target){
 //ADDING NEW CHOICE
 
 function addRemoveChoice(){
+    //ADDING CHOICE
     $('#add-question-modal .add-choice').click(function(){
         addChoiceRow($(this), true);
+    });
+
+    //ADDING QUESTION ROW
+    $('#add-question-modal .add-question-row').click(function(){
+        addQuestionRow($(this));
     });
 
 //REMOVING CHOICE
@@ -98,6 +105,15 @@ function addRemoveChoice(){
         }
     });
 
+    //Removeing Question Row
+    $('#add-question-modal .remove-question-row').click(function(){
+        console.log("row count -> " +questionRowCount);
+        if(questionRowCount>1){
+            $(this).closest('tr').remove();
+            --questionRowCount;
+        }
+    });
+
     //AUTO ADDING ON FOCUS ON LAST ROW
     $('.modal-choice-label').last().focusin(function () {
         // addChoiceRow($(this), false);
@@ -105,18 +121,40 @@ function addRemoveChoice(){
 }
 
 function addChoiceRow(context, focus){
+    console.log("dito pumasok");
     row = context.closest('tr');
     rowCopy = row.clone(true);
     // $('.modal-choice-label').off('focusin', '.modal-choice-label', addChoiceRow);
     // rowCopy.focusin(function () {
     //     addChoiceRow($(this), false);
     // });
-    choiceLabel = rowCopy.find('.modal-choice-label').val('');
+    choiceLabel = rowCopy.find('.modal-choice-label');
+    console.log(choiceLabel);
+    choiceLabel.val('');
+    console.log(choiceLabel);
     row.after(rowCopy);
     if(focus){
         choiceLabel.focus();
     }
     ++choiceCount;
+}
+
+function addQuestionRow(context){
+    console.log("dito pumasok");
+    row = context.closest('tr');
+    rowCopy = row.clone(true);
+    // $('.modal-choice-label').off('focusin', '.modal-choice-label', addChoiceRow);
+    // rowCopy.focusin(function () {
+    //     addChoiceRow($(this), false);
+    // });
+    rowLabel = rowCopy.find('.modal-row-label');
+    console.log(rowLabel);
+    rowLabel.val('');
+    console.log(rowLabel);
+    row.after(rowCopy);
+    rowLabel.focus();
+    ++questionRowCount;
+    console.log("row count -> " +questionRowCount);
 }
 
 
@@ -141,7 +179,6 @@ function saveQuestion(){
         }
         // console.log(rows);
 
-        //TODO likert scale validation(check rows if empty)
         choices = [];
         if(selectedChoiceType.attr('has-choices')==1){
             $.each($('.modal-choice-row'), function () {
@@ -264,16 +301,15 @@ function initializeForms(){
 //EDITING QUESTION
 function editQuestion(){
     $('.question-row-tools').click(function(){
+        questionRowIsClicked = true;
         questionRow = $(this).parent().find('.question-row');
         setupEditQuestion(questionRow);
-        questionRowIsClicked = true;
 
         // console.log(questionRowIsClicked);
     });
 }
 
 function setupEditQuestion(context) {
-
     $('.modal-choice-label').each(function () {
         $(this).parent().removeClass('has-error');
     });
@@ -282,11 +318,13 @@ function setupEditQuestion(context) {
     if(questionRow.data('has-choices') == 1){
         //COPYING CURRENT CHOICES TO MODAL
         rowChoiceDiv = $('.modal-choice-row').first().clone(true);
-        $('#modal-choices-table').html("");
+        body = $('#modal-choices-table').find('tbody');
+        body.html("");
         $.each(questionRow.find($('.choice-label')), function () {
             choice = rowChoiceDiv.clone(true);
             choice.find('.modal-choice-label').val($(this).text());
-            $('#modal-choices-table').append(choice);
+            choice.find('.weight').val($(this).data('weight'));
+            body.append(choice);
         });
     }
 
@@ -375,14 +413,10 @@ function moveQuestion(){
                 success: function (data) {
                     // console.log(data);
                     if(action == "move_question"){
-                        if(targetQuestion != null){
-                            if(position == "below"){
-                                $('#question'+targetQuestion).closest('.question-container').after(questionRow.parent());
-                            }else{ //above
-                                $('#question'+targetQuestion).closest('.question-container').before(questionRow.parent());
-                            }
+                        if(targetQuestion != 0){
+                            $('#question'+targetQuestion).closest('.question-container').after(questionRow.parent());
                         }else{
-                            getPage(targetPage).find('.question-container').append(questionRow.parent());
+                            getPage(targetPage).find('.question-container').prepend(questionRow.parent());
                         }
 
                         scrollTo(questionRow);
@@ -393,14 +427,10 @@ function moveQuestion(){
                         // newQuestion.attr('id', "question" +data);
                         // newQuestion.data('question-id', data);
                         // console.log($('.question-row-container').first());
-                        if(targetQuestion != null){
-                            if($('#move-position-select').val() == "below"){
-                                $('#question'+targetQuestion).closest('.question-row-container').after(newQuestion);
-                            }else{ //above
-                                $('#question'+targetQuestion).closest('.question-row-container').before(newQuestion);
-                            }
+                        if(targetQuestion != 0){
+                            $('#question'+targetQuestion).closest('.question-row-container').after(newQuestion);
                         }else{
-                            getPage(targetPage).find('.question-container').append(newQuestion);
+                            getPage(targetPage).find('.question-container').prepend(newQuestion);
                         }
                         setNewQuestionEvents(newQuestion.find('.question-row-tools'));
                         newQuestion.find('input').iCheck({
@@ -440,14 +470,12 @@ function changePage(){
 
 
 function getQuestionOptions(page){
-    var options = "";
+    var options = "<option value='0'>at beginning of page</option>";
     page.find('.question-row').each(function () {
-        options += "<option value='" +$(this).data('question-id') +"'>"
-            +$(this).find('.question-number').html() +" "
+        options += "<option value='" +$(this).data('question-id') +"'>After "
             +$(this).find('.question-title').html()
             + "</option>";
     });
-
 
     return options;
 }
@@ -491,29 +519,49 @@ function setupDeleteQuestion(context){
 
 function toggleAnswerChoices() {
     selectedChoiceType = $('#question-type-select').find('option:selected', this);
+    // console.log(selectedChoiceType.text());
+    $('.weight-field').hide();
+    $('#row-container').hide();
+    $('#max-rating-div').hide();
+
+    if(selectedChoiceType.text() == "Rating Scale"){
+        $('#max-rating-div').show();
+    }else if(selectedChoiceType.text() == "Likert Scale"){
+        $('.weight-field').show();
+        $('#row-container').show();
+
+        if(!questionRowIsClicked){
+            row = $('.modal-choice-row').last();
+            body = row.parent();
+            body.html('');
+            for(var i = 1; i <= 5; i++){
+                rowCopy = row.clone(true);
+                // console.log(parseInt(row.find('.weight').val())+1);
+                rowCopy.find('.weight').val(i);
+                body.append(rowCopy);
+            }
+            choiceCount = 5;
+        }else{
+            console.log("Pumasok sa likert scale");
+            //COPYING QUESTION ROWS FOR LIKERT SCALE
+            rowDiv = $('.modal-question-row').first().clone(true);
+            tbody = $('#modal-rows-table').find('tbody');
+            tbody.html("");
+            $.each(questionRow.find($('.likert-row')), function () {
+                console.log($(this).text());
+                row = rowDiv.clone(true);
+                row.find('.modal-row-label').val($(this).text());
+                tbody.append(row);
+            });
+        }
+    }
+
     if(selectedChoiceType.attr('has-choices')==1){
         $('#choice-container').show();
         // $('#choice-container').collapse('show');
     }else{
         $('#choice-container').hide();
         // $('#choice-container').collapse('hide');
-    }
-    console.log(selectedChoiceType.text());
-    $('.weight-field').hide();
-    $('#row-container').hide();
-    $('#max-rating-div').hide();
-    if(selectedChoiceType.text() == "Rating Scale"){
-        $('#max-rating-div').show();
-    }else if(selectedChoiceType.text() == "Likert Scale"){
-        $('.weight-field').show();
-        $('#row-container').show();
-        for(var i = 0; i < 3; i++){
-            row = $('.modal-choice-row').last();
-            rowCopy = row.clone(true);
-            rowCopy.find('.weight').val(parseInt(row.find('.weight').val())+1);
-            row.after(rowCopy);
-        }
-
     }
 }
 

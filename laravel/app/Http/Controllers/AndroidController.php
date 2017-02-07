@@ -148,6 +148,9 @@ class AndroidController extends Controller
                     }
                 }else{
                     $detail->text_answer = $responseDetail['text_answer'];
+                    if($question->questionType->type == "Text Area"){
+                        $this->dispatch(new AnalyzeText($detail));
+                    }
                 }
 
                 $detail->save();

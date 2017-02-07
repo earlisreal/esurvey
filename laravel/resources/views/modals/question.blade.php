@@ -81,12 +81,12 @@
                                                 </td>
                                                 <td>
                                                     <button type="button" tabindex="-1"
-                                                            class="btn btn-primary add-choice"><span
+                                                            class="btn btn-primary add-question-row"><span
                                                                 class="glyphicon glyphicon-plus"></span></button>
                                                 </td>
                                                 <td>
                                                     <button type="button" tabindex="-1"
-                                                            class="btn btn-danger remove-choice"><span
+                                                            class="btn btn-danger remove-question-row"><span
                                                                 class="glyphicon glyphicon-remove"></span></button>
                                                 </td>
                                             </tr>
@@ -99,12 +99,12 @@
                                                 </td>
                                                 <td>
                                                     <button type="button" tabindex="-1"
-                                                            class="btn btn-primary add-choice"><span
+                                                            class="btn btn-primary add-question-row"><span
                                                                 class="glyphicon glyphicon-plus"></span></button>
                                                 </td>
                                                 <td>
                                                     <button type="button" tabindex="-1"
-                                                            class="btn btn-danger remove-choice"><span
+                                                            class="btn btn-danger remove-question-row"><span
                                                                 class="glyphicon glyphicon-remove"></span></button>
                                                 </td>
                                             </tr>

@@ -13,16 +13,16 @@
                             <div class="panel-body">
                                 <form class="form-horizontal">
 
-                                    <div class="form-group">
-                                        <label for="move-position-select" class="control-label col-xs-3">Position</label>
-                                        <div class="col-xs-9">
-                                            <select name="move-position-select" id="move-position-select" class="form-control">
-                                                <option value="above">Above</option>
-                                                <option value="below">Below</option>
-                                            </select>
-                                        </div>
+                                    {{--<div class="form-group">--}}
+                                        {{--<label for="move-position-select" class="control-label col-xs-3">Position</label>--}}
+                                        {{--<div class="col-xs-9">--}}
+                                            {{--<select name="move-position-select" id="move-position-select" class="form-control">--}}
+                                                {{--<option value="above">Above</option>--}}
+                                                {{--<option value="below">Below</option>--}}
+                                            {{--</select>--}}
+                                        {{--</div>--}}
 
-                                    </div>
+                                    {{--</div>--}}
 
                                     <div class="form-group">
                                         <label for="target-page-select" class="control-label col-xs-3">Page</label>
@@ -34,7 +34,7 @@
                                     </div>
 
                                     <div class="form-group" id="move-copy-question-select">
-                                        <label for="target-question-select" class="control-label col-xs-3">Question</label>
+                                        <label for="target-question-select" class="control-label col-xs-3">Position</label>
                                         <div class="col-xs-9">
                                             <select name="target-question-select" id="target-question-select" class="form-control">
                                             </select>

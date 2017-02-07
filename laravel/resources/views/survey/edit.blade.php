@@ -214,11 +214,14 @@
                                                                       class="form-control"></textarea>
                                                         </div>
                                                     @elseif($type->type == "Likert Scale")
+                                                        @foreach($question->choices as $choice)
+                                                            <label hidden class="choice-label" data-weight="{{ $choice->weight }}">{{ $choice->label }}</label>
+                                                        @endforeach
                                                         <table class="table">
                                                             <tbody>
                                                             @foreach($question->rows as $row)
                                                                 <tr>
-                                                                    <th>{{ $row->label }}</th>
+                                                                    <th class="likert-row">{{ $row->label }}</th>
                                                                     @foreach($question->choices as $choice)
                                                                         <td>
                                                                             <label class="radio-inline">

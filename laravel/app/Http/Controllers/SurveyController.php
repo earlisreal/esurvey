@@ -283,8 +283,8 @@ class SurveyController extends Controller
                     $newOrder = 1;
                     $newPage = $request->target_page_id;
 
-                    if ($request->target_id != null) {
-                        $newOrder = $this->adjustQuestion($request->position, $request->target_id);
+                    if ($request->target_id != 0) {
+                        $newOrder = $this->adjustQuestion($request->target_id);
                     }
 
                     $question = Question::find($request->question_id);
@@ -317,6 +317,9 @@ class SurveyController extends Controller
                     }
                     if ($question->questionType->type == "Rating Scale") {
                         $this->replicateOption($question, $newQuestion);
+                    }
+                    if ($question->questionType->type == "Likert Scale") {
+                        $this->replicateRows($question, $newQuestion);
                     }
                     return view('ajax.question', ['question' => $newQuestion]);
                 });
@@ -401,16 +404,12 @@ class SurveyController extends Controller
 //        $this->updateSurveyTimestamps($survey);
     }
 
-    private function adjustQuestion($position, $target_id)
+    private function adjustQuestion($target_id)
     {
-        $sign = ($position == "above") ? '>=' : '>';
         $targetQuestion = Question::find($target_id);
-        $newOrder = $targetQuestion->order_no;
-        if ($position == "below") {
-            $newOrder += 1;
-        }
+        $newOrder = $targetQuestion->order_no + 1;
         $targetQuestion->surveyPage->questions()
-            ->where('order_no', $sign, $targetQuestion->order_no)
+            ->where('order_no', '>', $targetQuestion->order_no)
             ->increment('order_no');
         return $newOrder;
     }
@@ -444,6 +443,14 @@ class SurveyController extends Controller
         $newOption = $question->option->replicate();
         $newOption->question_id = $newQuestion->id;
         $newOption->save();
+    }
+
+    private function replicateRows(Question $question, Question $newQuestion){
+        foreach ($question->rows as $row){
+            $newRow = $row->replicate();
+            $newRow->question_id = $newQuestion->id;
+            $newRow->save();
+        }
     }
 
     public function show($id)

@@ -11,6 +11,7 @@
     </div>
 
     <div id="question{{ $question->id }}" class="row question-row" data-max-rating="{{ $question->option == null ? 3 : $question->option->max_rating }}" data-question-id="{{ $question->id }}" data-question-type="{{ $question->questionType->id }}" data-is-mandatory="{{ $question->is_mandatory }}" data-has-choices="{{ $question->questionType->has_choices }}">
+        <?php $type = $question->questionType ?>
         <div class="col-xs-12 height-adjuster">
             <div class="form-group">
                 <label>
@@ -54,11 +55,14 @@
                         <textarea cols="30" rows="2" class="form-control"></textarea>
                     </div>
                 @elseif($type->type == "Likert Scale")
+                    @foreach($question->choices as $choice)
+                        <label hidden class="choice-label" data-weight="{{ $choice->weight }}">{{ $choice->label }}</label>
+                    @endforeach
                     <table class="table">
                         <tbody>
                         @foreach($question->rows as $row)
                             <tr>
-                                <th>{{ $row->label }}</th>
+                                <th class="likert-row">{{ $row->label }}</th>
                                 @foreach($question->choices as $choice)
                                     <td>
                                         <label class="radio-inline">
