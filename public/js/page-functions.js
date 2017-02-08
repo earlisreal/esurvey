@@ -176,7 +176,7 @@ function movePage(){
         $('#move-copy-modal .submit-btn').prop('disabled', false);
         $('#move-copy-question-select').hide();
         sourcePageId = $(this).closest('.page-row').data('id');
-        options = getPageOptions();
+        options = getMovePageOptions();
 
         $('#target-page-select').html(options);
         action = $(this).data('action');
@@ -215,18 +215,18 @@ function movePage(){
                 success: function (data) {
                     console.log(data);
                     if(action == "move_page"){
-                        if($('#move-position-select').val() == "below"){
+                        if($('#target-page-select').val() != 0){
                             getPage($('#target-page-select').val()).after(getPage($('#selected-page-id').val()));
-                        }else{ //above
-                            getPage($('#target-page-select').val()).before(getPage($('#selected-page-id').val()));
+                        }else{
+                            $('#page-container').prepend(getPage($('#selected-page-id').val()));
                         }
                     }else{//replicate
                         var newPage = getPage(sourcePageId).clone(true);
                         newPage.attr('id', "page" +data);
-                        if($('#move-position-select').val() == "below"){
+                        if($('#target-page-select').val() != 0){
                             getPage($('#target-page-select').val()).after(newPage);
-                        }else{ //above
-                            getPage($('#target-page-select').val()).before(newPage);
+                        }else{
+                            $('#page-container').prepend(newPage);
                         }
                     }
                     updatePageNumbers();
@@ -258,7 +258,18 @@ function getPageOptions(){
     var options = "";
     $('.page-row').each(function () {
         options += "<option value='" +$(this).data('id') +"'>"
-            +$(this).data('page-number') +" "
+            +$(this).data('page-number') +": "
+            +$(this).data('title')
+            +"</option>";
+    });
+    return options;
+}
+
+function getMovePageOptions(){
+    var options = "<option value='0'>at beginning</option>";
+    $('.page-row').each(function () {
+        options += "<option value='" +$(this).data('id') +"'>after Page"
+            +$(this).data('page-number') +": "
             +$(this).data('title')
             +"</option>";
     });

@@ -20,7 +20,7 @@ $no = 1;
     <div class="panel-body">
         <form>
             <?php $prev = -1; ?>
-            @foreach($response->responseDetails as $detail)
+            @foreach($response->responseDetails->sortBy('question.order_no') as $detail)
                 <?php
                 $question = $detail->question;
                 $type = $question->questionType;

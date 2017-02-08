@@ -501,8 +501,10 @@ function setupDeleteQuestion(context){
             },
             success: function (data) {
                 successToast("Question Successfully Deleted!");
-                console.log(data);
+                // console.log(data);
                 $('#question'+questionID).parent().remove();
+
+                updateQuestionNumbers();
             },
             error: function(data){
                 response = $.parseJSON(data.responseText);

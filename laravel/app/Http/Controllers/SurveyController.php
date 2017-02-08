@@ -283,14 +283,14 @@ class SurveyController extends Controller
                     $newOrder = 1;
                     $newPage = $request->target_page_id;
 
-                    if ($request->target_id != 0) {
-                        $newOrder = $this->adjustQuestion($request->target_id);
-                    }
-
                     $question = Question::find($request->question_id);
                     $question->surveyPage->questions()
                         ->where('order_no', '>', $question->order_no)
                         ->decrement('order_no');
+
+                    if ($request->target_id != 0) {
+                        $newOrder = $this->adjustQuestion($request->target_id);
+                    }
 
                     $question->update([
                         'survey_page_id' => $newPage,
@@ -302,12 +302,16 @@ class SurveyController extends Controller
                 break;
             case 'copy_question':
                 return DB::transaction(function () use ($request, $survey) {
+                    $question = Question::find($request->question_id);
+
                     $newOrder = 1;
-                    if ($request->target_id != null) {
-                        $newOrder = $this->adjustQuestion($request->position, $request->target_id);
+                    if ($request->target_id != 0) {
+                        $newOrder = $this->adjustQuestion($request->target_id);
+                    }else{
+                        $question->surveyPage->questions()
+                            ->increment('order_no');
                     }
 
-                    $question = Question::find($request->question_id);
                     $newQuestion = $question->replicate();
                     $newQuestion->survey_page_id = $request->target_page_id;
                     $newQuestion->order_no = $newOrder;
@@ -338,20 +342,20 @@ class SurveyController extends Controller
                     $page = SurveyPage::find($request->page_id);
                     $targetPage = SurveyPage::find($request->target_id);
 
-                    if ($request->position == "below") {
-                        $sign = '>';
-                        $additional = 1;
-                    } else { //above
-                        $sign = '>=';
-                        $additional = 0;
+                    $newNo = 1;
+
+                    if($request->target_id != 0){
+                        SurveyPage::where('survey_id', $survey->id)
+                            ->where('page_no', '>', $targetPage->page_no)
+                            ->increment('page_no', 1);
+                        $newNo = $targetPage->page_no + 1;
+                    }else{
+                        SurveyPage::where('survey_id', $survey->id)
+                            ->increment('page_no', 1);
                     }
 
-                    SurveyPage::where('survey_id', $survey->id)
-                        ->where('page_no', $sign, $targetPage->page_no)
-                        ->increment('page_no', 1);
-
                     $newPage = $page->replicate();
-                    $newPage->page_no = $targetPage->page_no + $additional;
+                    $newPage->page_no = $newNo;
                     $newPage->save();
 
                     $this->replicateQuestions($page, $newPage);
@@ -363,38 +367,24 @@ class SurveyController extends Controller
                 return DB::transaction(function () use ($request, $survey) {
                     $page = SurveyPage::find($request->page_id);
                     $targetPage = SurveyPage::find($request->target_id);
-//                    $less = 0;
-//                    $increment = 0;
-
-                    if ($page->page_no < $targetPage->page_no) {
-                        $firstSign = '>';
-                        $increment = -1;
-                        if ($request->position == "below") {
-                            $less = 0;
-                            $secondSign = '<=';
-                        } else { //above
-                            $less = -1;
-                            $secondSign = '<';
-                        }
-                    } else if ($page->page_no >= $targetPage->page_no) {
-                        $firstSign = '<';
-                        $increment = 1;
-                        if ($request->position == "below") {
-                            $less = 1;
-                            $secondSign = '>';
-                        } else { //above
-                            $less = 0;
-                            $secondSign = '>=';
-                        }
-                    }
+                    $newNo = 1;
 
                     SurveyPage::where('survey_id', $survey->id)
-                        ->where('page_no', $firstSign, $page->page_no)
-                        ->where('page_no', $secondSign, $targetPage->page_no)
-                        ->increment('page_no', $increment);
+                        ->where('page_no', '>', $page->page_no)
+                        ->decrement('page_no', 1);
 
+                    if($request->target_id != 0){
+                        SurveyPage::where('survey_id', $survey->id)
+                            ->where('page_no', '>', $targetPage->page_no)
+                            ->increment('page_no', 1);
 
-                    $page->update(['page_no' => $targetPage->page_no + $less]);
+                        $newNo = $targetPage->page_no + 1;
+                    }else{
+                        SurveyPage::where('survey_id', $survey->id)
+                            ->increment('page_no', 1);
+                    }
+
+                    $page->update(['page_no' => $newNo]);
                     return $page->id;
                 });
                 break;
@@ -424,6 +414,9 @@ class SurveyController extends Controller
                 $newOption = $question->option->replicate();
                 $newOption->question_id = $newQuestion->id;
                 $newOption->save();
+            }
+            if ($question->questionType->type == "Likert Scale") {
+                $this->replicateRows($question, $newQuestion);
             }
             $this->replicateChoices($question, $newQuestion);
         }

@@ -29,7 +29,7 @@
                             <h3 class="box-title">{{ $category->category }}</h3>
                         </div>
                         <div class="box-body">
-                            @foreach($category->surveys()->where('is_template', 1)->get() as $template)
+                            @foreach($category->surveys()->where('is_template', 1)->where('published', 1)->get() as $template)
                                 <?php
                                     $count = 0;
                                     foreach ($template->pages as $page){
