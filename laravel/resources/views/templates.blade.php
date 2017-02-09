@@ -55,7 +55,7 @@
                                             {{ csrf_field() }}
                                             <input type="hidden" name="create_from" value="template">
                                             <input type="hidden" name="survey_template" value="{{ $template->id }}">
-                                            <button type="submit" class="btn btn-primary"><i class="fa fa-btn fa-file-archive-o"></i>Use template</button>
+                                            <button type="submit" class="btn btn-primary use-template"><i class="fa fa-btn fa-file-archive-o"></i>Use template</button>
                                         </form>
                                     </div>
                                 </div>
@@ -77,4 +77,15 @@
     </div>
 </div>
 
+@endsection
+
+@section('scripts')
+    <script>
+        $('.use-template').click(function () {
+            $(this).prop('disabled', true);
+            console.log("earl is eral");
+            loadingToast("Copying Template Questions...");
+            $(this).closest('form').submit();
+        });
+    </script>
 @endsection

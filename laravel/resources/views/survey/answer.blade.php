@@ -53,8 +53,8 @@
                                         }
                                         ?>
                                         <div class="row">
-                                            <audio id="voice{{$question->id}}"
-                                                   src="{{ asset('public/sounds/speech/wav/question' .$question->id .'.wav') }}"></audio>
+                                            {{--<audio id="voice{{$question->id}}"--}}
+                                                   {{--src="{{ asset('public/sounds/speech/wav/question' .$question->id .'.wav') }}"></audio>--}}
                                             <div class="col-xs-12">
                                                 <div class="form-group">
                                                     <label for="{{ $question->id }}">
@@ -200,7 +200,8 @@
         //        console.log("earl is rteal");
 
         $('.play-audio').click(function () {
-            $('#voice' + $(this).data('id'))[0].play();
+//            $('#voice' + $(this).data('id'))[0].play();
+            textToSpeech($(this).parent().find('.question-title').text());
         });
 
         $('.rating-scale').barrating({
@@ -240,5 +241,10 @@
 
             }
         });
+
+        function textToSpeech(message){
+            var msg = new SpeechSynthesisUtterance(message);
+            window.speechSynthesis.speak(msg);
+        }
     </script>
 @endsection

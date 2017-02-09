@@ -73,9 +73,9 @@ class ResultController extends Controller
                 } else {
                     $filters[$datas['id']] = $datas['values'];
                 }
-                Log::info("QUESTION FILTER TEST:");
+//                Log::info("QUESTION FILTER TEST:");
                 Cache::forever('question' . $id, $filters);
-                Log::info(Cache::get('question' . $id));
+//                Log::info(Cache::get('question' . $id));
                 break;
             case "texts":
 
@@ -95,16 +95,16 @@ class ResultController extends Controller
 
     public function removeFilter($id, Request $request)
     {
-        Log::info($request);
+//        Log::info($request);
         $survey = Survey::findOrFail($id);
         $key = $request->key;
         if ($key == "question") {
             $questions = Cache::get('question' . $id);
             $question = Question::find($request->id);
             if ($question->questionType->type == "Likert Scale") {
-                Log::info("LOG FROM EARL");
-                Log::info($questions[$request->id]);
-                Log::info($questions[$request->id][$request->row]);
+//                Log::info("LOG FROM EARL");
+//                Log::info($questions[$request->id]);
+//                Log::info($questions[$request->id][$request->row]);
                 unset($questions[$request->id][$request->row]);
             } else {
                 unset($questions[$request->id]);
@@ -138,11 +138,11 @@ class ResultController extends Controller
         $filters['question'] = Cache::get('question' . $id);
 //        }
 
-        Log::info(Cache::get('question' . $id));
+//        Log::info(Cache::get('question' . $id));
 
         if (Cache::has(['date' . $id])) {
             $filters['date'] = Cache::get('date' . $id);
-            Log::info($filters['date']);
+//            Log::info($filters['date']);
         }
 
         $count = 0;
@@ -181,8 +181,8 @@ class ResultController extends Controller
                 if (!empty($filters['question'])) {
                     $questions = $filters['question'];
                     if (count($questions) > 0) {
-                        Log::info("QUESTION READ");
-                        Log::info($questions);
+//                        Log::info("QUESTION READ");
+//                        Log::info($questions);
                         $base->where(function ($query) use ($questions) {
                             foreach ($questions as $id => $values) {
 

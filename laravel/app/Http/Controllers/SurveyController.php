@@ -53,7 +53,7 @@ class SurveyController extends Controller
     public function create(Request $request)
     {
 
-        Log::info($request);
+//        Log::info($request);
         if ($request->create_from == "existing") {
             $this->validate($request, [
                 'existing_survey' => 'required',
@@ -144,7 +144,7 @@ class SurveyController extends Controller
 
     public function store($id, Request $request) //storing the question
     {
-        Log::info($request);
+//        Log::info($request);
         $this->validate($request, [
             'question_title' => 'required|max:250',
             'question_type' => 'required',
@@ -497,11 +497,11 @@ class SurveyController extends Controller
             ]);
         });
 
-        foreach ($survey->pages as $page){
-            foreach ($page->questions as $question){
-                $this->dispatch(new SaveQuestionSpeech($question));
-            }
-        }
+//        foreach ($survey->pages as $page){
+//            foreach ($page->questions as $question){
+//                $this->dispatch(new SaveQuestionSpeech($question));
+//            }
+//        }
 
         if ($survey->is_template) {
             return redirect('admin/templates');

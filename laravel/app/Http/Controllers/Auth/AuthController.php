@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Jobs\SendActivationEmail;
 use App\User;
 use Carbon\Carbon;
 use Illuminate\Contracts\Logging\Log;
@@ -90,19 +91,7 @@ class AuthController extends Controller
             'birthday' => Carbon::parse($data['birthday'])->toDateString(),
             'activation_code' => $activationCode,
         ]);
-        try {
-            Mail::send('emails.activation',
-                [
-                    'code' => $activationCode,
-                    'id' => $user->id,
-                    'name' => $user->first_name . ' ' . $user->last_name
-                ], function ($message) use ($user) {
-                    $message->subject('eSurvey Verification');
-                    $message->to($user->email);
-                });
-        } catch (\Exception $e) {
-            Log::error($e->getMessage());
-        }
+        $this->dispatch(new SendActivationEmail($user));
         return $user;
     }
 }

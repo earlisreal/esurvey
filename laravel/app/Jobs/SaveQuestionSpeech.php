@@ -58,7 +58,7 @@ class SaveQuestionSpeech extends Job implements ShouldQueue
             $descriptorspec = array(
                 0 => array("pipe", "r"),
                 1 => array("pipe", "w"),
-                2 => array("file", base_path("../public/sounds/temp/null" . $this->question->id), "w")
+                2 => array("file", base_path("../public/sounds/speech/wav/null"), "w")
             );
 
             Log::info("Opening Process..");

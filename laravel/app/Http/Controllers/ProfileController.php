@@ -120,16 +120,22 @@ class ProfileController extends Controller
         $user->update([
             'activation_code' => $activationCode
         ]);
-        Mail::send('emails.activation',
-            [
-                'code' => $activationCode,
-                'id' => $user->id,
-                'name' => $request->user()->first_name . ' ' . $user->last_name
-            ], function ($message) use ($user) {
-                $message->subject('eSurvey Verification');
-                $message->to($user->email);
-            });
-        return redirect('verify')->with('status', 'Confirmation Email sent!');
+        try {
+            Mail::send('emails.activation',
+                [
+                    'code' => $user->activation_code,
+                    'id' => $user->id,
+                    'name' => $user->first_name . ' ' . $user->last_name
+                ], function ($message) use($user) {
+                    $message->subject('eSurvey Verification');
+                    $message->to($user->email);
+                });
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
+        }
+
+//        $this->dispatch(new SendActivationEmail($user));
+        return redirect('verify')->with('status', 'Confirmation Email sent! Please check your inbox.');
     }
 
     public function changeEmail(Request $request)

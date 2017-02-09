@@ -13,7 +13,9 @@
 
 
 
-Route::get('test', 'TestController@test');
+Route::get('test', function (){
+    return view('test');
+});
 
 Route::get('voice', 'TestController@voice');
 
@@ -69,7 +71,7 @@ Route::patch('/create/{id}', 'SurveyController@publish');
 
 Route::get('/share/{id}', 'SurveyController@share');
 
-Route::post('/share/{id}', 'SurveyController@');
+Route::post('/share/{id}', 'SurveyController@update');
 
 /*************************************************************************************************************
  *                                          SETTINGS                                                         *

@@ -12,7 +12,7 @@
     <form id="labnol" method="get" action="https://www.google.com/search">
         <div class="speech">
             <input type="text" name="q" id="transcript" placeholder="Speak" />
-            <img onclick="startDictation()" src="//i.imgur.com/cHidSVu.gif" />
+            <img onclick="textToSpeech()" src="//i.imgur.com/cHidSVu.gif" />
         </div>
     </form>
 
@@ -43,6 +43,11 @@
                 }
 
             }
+        }
+
+        function textToSpeech(){
+            var msg = new SpeechSynthesisUtterance('Hello World');
+            window.speechSynthesis.speak(msg);
         }
     </script>
 @endsection
