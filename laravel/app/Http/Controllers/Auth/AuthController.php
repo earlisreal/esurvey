@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Jobs\SendActivationEmail;
+use App\Jobs\SendEmail;
 use App\User;
 use Carbon\Carbon;
 use Illuminate\Contracts\Logging\Log;
@@ -91,7 +92,7 @@ class AuthController extends Controller
             'birthday' => Carbon::parse($data['birthday'])->toDateString(),
             'activation_code' => $activationCode,
         ]);
-        $this->dispatch(new SendActivationEmail($user));
+        $this->dispatch(new SendEmail($user));
         return $user;
     }
 }

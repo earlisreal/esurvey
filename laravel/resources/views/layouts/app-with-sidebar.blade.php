@@ -142,7 +142,7 @@
                         <li class="header">SURVEY NAVIGATION</li>
                         <li class="{{ Request::is('survey/'.$survey->id) ? 'active' : '' }}"><a href="{{ url('survey/'.$survey->id) }}"><i class="fa fa-dashboard"></i> Dashboard</a></li>
                         @if($survey->published)
-                        <li><a href=""><i class="fa fa-eye"></i> Preview</a></li>
+                        <li><a href="{{ url('create/'.$survey->id) }}"><i class="fa fa-eye"></i> Preview</a></li>
                         @else
                             <li class="{{ Request::is('create/'.$survey->id) ? 'active' : '' }}"><a href="{{ url('create/'.$survey->id) }}"><i class="fa fa-edit"></i> Edit</a></li>
                             @endif

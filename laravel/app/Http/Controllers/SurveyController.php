@@ -594,7 +594,7 @@ class SurveyController extends Controller
     public function settings($id)
     {
         $survey = Survey::findOrFail($id);
-        if ($survey->option == null) return "No option";
+        if ($survey->option == null) return view('misc.publish-first', ['survey' => $survey]);
         return view('survey.settings', [
             'survey' => $survey,
             'option' => $survey->option

@@ -9,6 +9,8 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Support\Facades\Mail;
 
+use Log;
+
 class SendActivationEmail extends Job implements ShouldQueue
 {
     use InteractsWithQueue, SerializesModels;

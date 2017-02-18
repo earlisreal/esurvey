@@ -44,7 +44,7 @@ class AnalyzeText extends Job implements ShouldQueue
                     'outputMode' => 'json'
                 ]
             ]);
-        Log::info($res->getBody());
+        //Log::info($res->getBody());
         $analysis = json_decode($res->getBody());
 //        Log::info("Status -> " . $analysis->status);
         if($res->getStatusCode() == 200){

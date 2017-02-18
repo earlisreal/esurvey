@@ -7,7 +7,6 @@ var choiceCount = 2;
 var questionRowCount = 2;
 
 $(function () {
-    console.log("test rearl");
     //!!IMPORTANT
     updateQuestionNumbers();
     $(".question-row-container").each(function(){
@@ -23,6 +22,7 @@ $(function () {
         });
     }else{
         addQuestion();
+        addRemoveRow();
         addRemoveChoice();
         saveQuestion();
         editQuestion();
@@ -86,23 +86,33 @@ function setupNewQuestion(target){
 //ADDING NEW CHOICE
 
 function addRemoveChoice(){
+    console.log("add remove choice");
+
     //ADDING CHOICE
     $('#add-question-modal .add-choice').click(function(){
+        console.log("test");
         addChoiceRow($(this), true);
     });
 
-    //ADDING QUESTION ROW
-    $('#add-question-modal .add-question-row').click(function(){
-        addQuestionRow($(this));
-    });
-
 //REMOVING CHOICE
-
     $('#add-question-modal .remove-choice').click(function(){
         if(choiceCount>2){
             $(this).closest('tr').remove();
             --choiceCount;
         }
+    });
+
+
+    //AUTO ADDING ON FOCUS ON LAST ROW
+    $('.modal-choice-label').last().focusin(function () {
+        // addChoiceRow($(this), false);
+    });
+}
+
+function addRemoveRow(){
+    //ADDING QUESTION ROW
+    $('#add-question-modal .add-question-row').click(function(){
+        addQuestionRow($(this));
     });
 
     //Removeing Question Row
@@ -113,15 +123,10 @@ function addRemoveChoice(){
             --questionRowCount;
         }
     });
-
-    //AUTO ADDING ON FOCUS ON LAST ROW
-    $('.modal-choice-label').last().focusin(function () {
-        // addChoiceRow($(this), false);
-    });
 }
 
 function addChoiceRow(context, focus){
-    console.log("dito pumasok");
+    console.log("add choice row");
     row = context.closest('tr');
     rowCopy = row.clone(true);
     // $('.modal-choice-label').off('focusin', '.modal-choice-label', addChoiceRow);
@@ -129,9 +134,9 @@ function addChoiceRow(context, focus){
     //     addChoiceRow($(this), false);
     // });
     choiceLabel = rowCopy.find('.modal-choice-label');
-    console.log(choiceLabel);
+    // console.log(choiceLabel);
     choiceLabel.val('');
-    console.log(choiceLabel);
+    // console.log(choiceLabel);
     row.after(rowCopy);
     if(focus){
         choiceLabel.focus();
@@ -556,6 +561,8 @@ function toggleAnswerChoices() {
                 tbody.append(row);
             });
         }
+
+        addRemoveChoice();
     }
 
     if(selectedChoiceType.attr('has-choices')==1){

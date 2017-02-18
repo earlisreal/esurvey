@@ -37,7 +37,7 @@
                                     }
                                 ?>
                                     <label>
-                                        <a href="{{ url('templates/'.$template->id) }}">{{ $template->survey_title }}</a>
+                                        <a href="{{ url('templates/'.$template->id) }}" target="_blank">{{ $template->survey_title }}</a>
                                     </label>
                                 <div class="row">
                                     <div class="col-sm-6">

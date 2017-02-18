@@ -1,4 +1,4 @@
-@extends($adminMode ? 'layouts.admin' : 'layouts.app-with-sidebar')
+@extends($adminMode ? 'layouts.admin' : Request::is('templates/'.$survey->id) ? 'layouts.app' : 'layouts.app-with-sidebar')
 
 @if($adminMode)
 @section('content-header')
