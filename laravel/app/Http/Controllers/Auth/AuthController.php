@@ -92,7 +92,7 @@ class AuthController extends Controller
             'birthday' => Carbon::parse($data['birthday'])->toDateString(),
             'activation_code' => $activationCode,
         ]);
-        $this->dispatch(new SendEmail($user));
+        $this->dispatch(new SendActivationEmail($user));
         return $user;
     }
 }
