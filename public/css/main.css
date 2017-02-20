@@ -130,15 +130,26 @@ textarea {
     left: 0;
     background-color: white;
     margin: auto;
-    height:100%;
+    height: 100%;
     width: 100%;
 }
 
-#loading-spinner{
+#loading-spinner {
     margin-top: 25%;
     /*margin-right: 50%;*/
 }
 
-.main-page{
+.main-page {
     background-color: #f9fafc;
+}
+
+.sample-circle {
+    width: 50px;
+    height: 50px;
+    border-radius: 50px;
+    font-size: 20px;
+    color: #fff;
+    line-height: 100px;
+    text-align: center;
+    background: #000
 }

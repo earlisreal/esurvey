@@ -53,26 +53,6 @@ function publishSurvey(){
             if(result){
                 $('.publish-form').submit();
             }
-            // $.ajax({
-            //     beforeSend: function () {
-            //         loadingToast("Publishing Survey...");
-            //     },
-            //     type: "PATCH",
-            //     data: {
-            //
-            //     },
-            //     success: function (data) {
-            //         console.log(data);
-            //         if(data != ""){
-            //             window.location.href = data;
-            //         }
-            //         successToast("Survey Successfully Published!");
-            //     },
-            //     error: function (data) {
-            //         console.log(data);
-            //         errorToast("Fail!");
-            //     }
-            // });
         });
     });
 }

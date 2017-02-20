@@ -21,6 +21,7 @@ use Illuminate\Http\Request;
 use App\SurveyCategory;
 use App\Http\Requests;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use App\Repositories\TaskRepository;
 use Illuminate\Support\Facades\Storage;
@@ -485,7 +486,7 @@ class SurveyController extends Controller
         return redirect('mysurveys');
     }
 
-    public function publish($id)
+    public function publish($id, Request $request)
     {
         $survey = Survey::find($id);
         DB::transaction(function () use ($id, $survey) {
@@ -496,6 +497,8 @@ class SurveyController extends Controller
                 'survey_id' => $id,
             ]);
         });
+
+        Cache::forever('theme'.$id, $request->theme);
 
 //        foreach ($survey->pages as $page){
 //            foreach ($page->questions as $question){
@@ -571,6 +574,8 @@ class SurveyController extends Controller
             'register_required' => $request->register_required,
         ]);
 
+        Cache::forever('theme'.$id, $request->theme);
+
         return redirect()->back()->with('status', "Settings Successfully updated!");
     }
 
@@ -597,7 +602,8 @@ class SurveyController extends Controller
         if ($survey->option == null) return view('misc.publish-first', ['survey' => $survey]);
         return view('survey.settings', [
             'survey' => $survey,
-            'option' => $survey->option
+            'option' => $survey->option,
+            'theme' => Cache::get('theme'.$id)
         ]);
     }
 

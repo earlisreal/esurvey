@@ -16,20 +16,20 @@
                             {{--Page {{ $page->page_no }}--}}
                             {{--</span>--}}
                             {{--</h4>--}}
-                            <div class="panel panel-primary">
+                            <div class="box box-solid box-{{ $boxTheme }}">
 
-                                <div class="panel-heading">
-                                    <h3 class="panel-title">{{ $survey->survey_title }}</h3>
+                                <div class="box-header">
+                                    <h3 class="box-title">{{ $survey->survey_title }}</h3>
                                 </div>
 
 
                                 @if($page->page_title != "" && $page->page_title != null)
-                                    <div class="panel-footer">
+                                    <div class="box-footer">
                                         {{ $page->page_title }}
                                     </div>
                                 @endif
 
-                                <div class="panel-body">
+                                <div class="box-body">
 
                                     <div class="row">
                                         <div class="col-xs-12">
@@ -77,7 +77,7 @@
                                                         @foreach($question->choices()->get() as $choice)
                                                             <div class="form-group">
                                                                 <label for="{{ $question->id }}" class="editable">
-                                                                    <input type="radio"
+                                                                    <input type="radio" class="{{ !empty($theme) ? 'input-'.$theme : '' }}"
                                                                            name="question{{ $question->id }}"
                                                                            {{ old('question'.$question->id) == $choice->id ? 'checked' : '' }}
                                                                            value="{{ $choice->id }}" {{ $question->is_mandatory ? 'required' : '' }}>
@@ -97,7 +97,7 @@
                                                         @foreach($question->choices()->get() as $choice)
                                                             <div class="form-group">
                                                                 <label for="{{ $question->id }}" class="editable">
-                                                                    <input type="checkbox"
+                                                                    <input type="checkbox" class="{{ !empty($theme) ? 'input-'.$theme : '' }}"
                                                                            name="question{{ $question->id }}[]"
                                                                            value="{{ $choice->id }}"> {{ $choice->label }}
                                                                 </label>
@@ -147,7 +147,7 @@
                                                                         <td>
                                                                             <label for="{{ $question->id }}"
                                                                                    class="radio-inline">
-                                                                                <input type="radio"
+                                                                                <input type="radio" class="{{ !empty($theme) ? 'input-'.$theme : '' }}"
                                                                                        name="row{{ $row->id }}"
                                                                                        {{ old('row'.$row->id) == $row->id ? 'checked' : '' }}
                                                                                        value="{{ $choice->id }}" {{ $question->is_mandatory ? 'required' : '' }}>
@@ -184,7 +184,7 @@
                     @endforeach
                     <div class="form-group">
 
-                        <button type="submit" class="btn btn-lg btn-facebook center-block"><i
+                        <button type="submit" class="btn btn-lg btn-{{ $boxTheme }} center-block"><i
                                     class="fa fa-btn fa-share"></i>Submit
                         </button>
                     </div>

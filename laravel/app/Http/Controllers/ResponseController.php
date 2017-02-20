@@ -11,6 +11,7 @@ use Carbon\Carbon;
 use GuzzleHttp\Client;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Jenssegers\Agent\Agent;
@@ -54,8 +55,34 @@ class ResponseController extends Controller
                                 'message' => "You already Answered this Survey. Thank you!"
                             ]);
                         } else {
+                            $theme = Cache::get('theme'.$id);
+                            switch ($theme){
+                                case 'red':
+                                    $boxTheme = 'danger';
+                                    break;
+                                case 'blue':
+                                    $boxTheme = 'primary';
+                                    break;
+                                case 'green':
+                                    $boxTheme = 'success';
+                                    break;
+                                case 'aqua':
+                                    $boxTheme = 'info';
+                                    break;
+                                case 'yellow':
+                                    $boxTheme = 'warning';
+                                    break;
+                                case 'gray':
+                                    $boxTheme = 'default';
+                                    break;
+                                default:
+                                    $boxTheme = 'primary';
+                            }
+
                             return view('survey.answer', [
                                 'survey' => $survey,
+                                'boxTheme' => $boxTheme,
+                                'theme' => $theme
                             ]);
                         }
                     } else {

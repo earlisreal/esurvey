@@ -26,6 +26,31 @@ $(function () {
         checkboxClass: 'icheckbox_square-blue',
         radioClass: 'iradio_square-blue'
     });
+
+    $('.input-red').iCheck({
+        checkboxClass: 'icheckbox_square-red',
+        radioClass: 'iradio_square-red'
+    });
+
+    $('.input-green').iCheck({
+        checkboxClass: 'icheckbox_square-green',
+        radioClass: 'iradio_square-green'
+    });
+
+    $('.input-yellow').iCheck({
+        checkboxClass: 'icheckbox_square-yellow',
+        radioClass: 'iradio_square-yellow'
+    });
+
+    $('.input-gray').iCheck({
+        checkboxClass: 'icheckbox_square-grey',
+        radioClass: 'iradio_square-grey'
+    });
+
+    $('.input-aqua').iCheck({
+        checkboxClass: 'icheckbox_square-aero',
+        radioClass: 'iradio_square-aero'
+    });
 });
 
 function validateInputs(){

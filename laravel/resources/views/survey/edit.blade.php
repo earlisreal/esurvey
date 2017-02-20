@@ -59,7 +59,7 @@
             <form method="POST" action="{{ url('/create/'.$survey->id) }}" class="publish-form">
                 {{ csrf_field() }}
                 {{ method_field('PATCH') }}
-                <button type="button" id="publish-survey" class="btn btn-lg btn-primary"><i
+                <button type="button" data-toggle="modal" data-target="#publish-modal" class="btn btn-lg btn-primary"><i
                             class="fa fa-btn fa-share"></i>Publish Survey
                 </button>
             </form>
@@ -73,6 +73,8 @@
     @include('modals.question')
 
     @include('modals.moveCopy')
+
+    @include('modals.publish')
 
     <input type="hidden" id="selected-page-id" value="0">
 

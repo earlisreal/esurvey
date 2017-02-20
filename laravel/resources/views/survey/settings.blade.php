@@ -42,6 +42,39 @@
             <div class="box-body">
                 {{ csrf_field() }}
                 {{ method_field('PATCH') }}
+
+                <div class="form-group">
+                    <label for="response_message" class="col-xs-4">Theme:</label>
+                    <div class="radio col-xs-8">
+                        <label class="radio-inline">
+                            <input type="radio" name="theme" value="blue" {{ $theme == 'blue' ? 'checked' : '' }}>
+                            <div class="sample-circle bg-blue"></div>
+                        </label>
+                        <label class="radio-inline">
+                            <input type="radio" name="theme" value="red" {{ $theme == 'red' ? 'checked' : '' }}>
+                            <div class="sample-circle bg-red"></div>
+                        </label>
+                        <label class="radio-inline">
+                            <input type="radio" name="theme" value="yellow" {{ $theme == 'yellow' ? 'checked' : '' }}>
+                            <div class="sample-circle bg-yellow"></div>
+                        </label>
+                        <label class="radio-inline">
+                            <input type="radio" name="theme" value="green" {{ $theme == 'green' ? 'checked' : '' }}>
+                            <div class="sample-circle bg-green"></div>
+                        </label>
+                        <label class="radio-inline">
+                            <input type="radio" name="theme" value="aqua" {{ $theme == 'aqua' ? 'checked' : '' }}>
+                            <div class="sample-circle bg-aqua"></div>
+                        </label>
+                        <label class="radio-inline">
+                            <input type="radio" name="theme" value="gray" {{ $theme == 'gray' ? 'checked' : '' }}>
+                            <div class="sample-circle bg-gray"></div>
+                        </label>
+                    </div>
+                </div>
+
+                <hr>
+
                 <div class="form-group">
                     <label for="response_message" class="col-xs-4">Message for Response:</label>
                     <div class="radio col-xs-8">
