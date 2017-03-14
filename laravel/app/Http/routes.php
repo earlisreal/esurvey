@@ -36,6 +36,25 @@ Route::get('/v/{id}/{code}', 'PublicController@activateUser');
 Route::get('/home/', 'HomeController@show');
 
 /*************************************************************************************************************
+ *                                    Subscription                                                           *
+ *************************************************************************************************************/
+
+Route::get('subscription', 'ProfileController@subscribe');
+
+Route::post('subscription/checkout', 'ProfileController@checkout');
+
+Route::post('subscription/cancel', 'ProfileController@cancelSubscription');
+
+Route::get('subscription/success', 'ProfileController@success');
+
+Route::post(
+    'stripe/webhook',
+    '\Laravel\Cashier\Http\Controllers\WebhookController@handleWebhook'
+);
+
+
+
+/*************************************************************************************************************
  *                                         User                                                              *
  *************************************************************************************************************/
 

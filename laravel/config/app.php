@@ -142,6 +142,9 @@ return [
     */
 
     'providers' => [
+        //Stripe
+        Laravel\Cashier\CashierServiceProvider::class,
+
         //Cloud Convert
         RobbieP\CloudConvertLaravel\CloudConvertLaravelServiceProvider::class,
 

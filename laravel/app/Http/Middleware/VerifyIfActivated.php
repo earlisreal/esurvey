@@ -15,9 +15,15 @@ class VerifyIfActivated
      */
     public function handle($request, Closure $next)
     {
-        if($request->user()->verified)
-        return $next($request);
+        if(!$request->user()->verified){
+            return redirect('verify');
+        }
 
-        return redirect('verify');
+        if ($request->user()->role->id == 2 && ! $request->user()->subscribed('main')) {
+            // This user is not a paying customer...
+            return redirect('subscription');
+        }
+
+        return $next($request);
     }
 }

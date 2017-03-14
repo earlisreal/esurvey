@@ -3,7 +3,8 @@
         <div class="container">
             <div class="navbar-header">
                 <a href="@if (Auth::guest()){{ url('/') }} @else {{ url('mysurveys') }} @endif" class="navbar-brand"><b>e</b>Survey</a>
-                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+                        data-target="#navbar-collapse">
                     <i class="fa fa-bars"></i>
                 </button>
             </div>
@@ -12,13 +13,14 @@
             <div class="collapse navbar-collapse pull-left" id="navbar-collapse">
                 <ul class="nav navbar-nav">
                     @if (Auth::user())
-
-                        <!-- Create Survey, Display in all pages -->
-                        <li><a href="{{ url('/create') }}" id="create-survey" class="btn-facebook"><i class="fa fa-plus"></i> Create Survey</a></li>
-                        <li><a href="{{ url('mysurveys') }}"><i class="fa fa-edit"></i> My Surveys</a></li>
-                        <li><a href="{{ url('templates') }}"><i class="fa fa-list-alt"></i> Templates</a></li>
+                        @if(Auth::user()->subscribed('main') || Auth::user()->role->title != "User")
+                            <li><a href="{{ url('/create') }}" id="create-survey" class="btn-facebook"><i
+                                            class="fa fa-plus"></i> Create Survey</a></li>
+                            <li><a href="{{ url('mysurveys') }}"><i class="fa fa-edit"></i> My Surveys</a></li>
+                            <li><a href="{{ url('templates') }}"><i class="fa fa-list-alt"></i> Templates</a></li>
+                        @endif
                         @if(Auth::user()->role->title != "User")
-                        <li><a href="{{ url('admin') }}"><i class="fa fa-user"></i> Admin Mode</a></li>
+                            <li><a href="{{ url('admin') }}"><i class="fa fa-user"></i> Admin Mode</a></li>
                         @endif
                     @endif
                 </ul>
@@ -34,7 +36,7 @@
                         <li><a href="{{ url('/register') }}">Register</a></li>
                     @else
 
-                        <!-- User Account Menu -->
+                    <!-- User Account Menu -->
                         @include('common.user-menu')
                     @endif
                 </ul>

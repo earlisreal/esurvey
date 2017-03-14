@@ -126,7 +126,7 @@ class ProfileController extends Controller
                     'code' => $user->activation_code,
                     'id' => $user->id,
                     'name' => $user->first_name . ' ' . $user->last_name
-                ], function ($message) use($user) {
+                ], function ($message) use ($user) {
                     $message->subject('eSurvey Verification');
                     $message->to($user->email);
                 });
@@ -162,5 +162,31 @@ class ProfileController extends Controller
                 $message->to($user->email);
             });
         return redirect('verify')->with('status', 'Confirmation Email sent to your new Email!');
+    }
+
+    public function subscribe(Request $request)
+    {
+        return view('user.subscribe');
+    }
+
+    public function checkout(Request $request)
+    {
+        //return $this->chargeCustomer($product->id, $product->price, $product->name, );
+        $creditCardToken = $request->input('stripeToken');
+        $user = $request->user();
+        $user->newSubscription('main', 'main')->create($creditCardToken);
+
+        return redirect('/');
+    }
+
+    public function success(Request $request)
+    {
+        return view('misc.random-message', ['message' => "Payment Successful!"]);
+    }
+
+    public function cancelSubscription(Request $request)
+    {
+        $request->user()->subscription('main')->cancel();
+        return redirect()->back();
     }
 }
